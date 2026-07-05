@@ -1,0 +1,67 @@
+id: feature-development
+name: Feature Development Workflow
+version: 1.0.0
+
+description: |
+  Standard workflow for implementing a new feature using ADF.
+  Every stage must pass its quality gate before the next stage starts.
+
+trigger:
+  type: feature
+
+stages:
+  - id: feature
+    agent: feature-agent
+    produces:
+      - specification.md
+    gate:
+      required:
+        - specification.md
+      status: READY_FOR_ARCHITECTURE
+
+  - id: architecture
+    agent: architecture-agent
+    consumes:
+      - specification.md
+    produces:
+      - architecture.md
+    gate:
+      required:
+        - architecture.md
+      status: READY_FOR_IMPLEMENTATION
+
+  - id: implementation
+    agent: implementation-agent
+    consumes:
+      - specification.md
+      - architecture.md
+    produces:
+      - implementation-report.md
+      - source-code
+      - tests
+    gate:
+      required:
+        - implementation-report.md
+      status: READY_FOR_REVIEW
+
+  - id: review
+    agent: review-agent
+    consumes:
+      - specification.md
+      - architecture.md
+      - implementation-report.md
+      - source-code
+      - tests
+    produces:
+      - review-report.md
+    gate:
+      required:
+        - review-report.md
+      status: COMPLETED
+
+rules:
+  - Every stage is stateless.
+  - Agents communicate only through artifacts.
+  - No agent may modify artifacts owned by a previous stage.
+  - A failed gate stops the workflow.
+  - Human approval is required before moving to the next stage.

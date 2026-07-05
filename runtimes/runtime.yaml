@@ -1,0 +1,25 @@
+agent:
+
+feature-agent
+
+load:
+
+- agent.yaml
+
+- system.md
+
+- instructions.md
+
+- checklist.md
+
+- templates/specification.md
+
+- context/**
+
+execute:
+
+system
+
+output:
+
+specification.md

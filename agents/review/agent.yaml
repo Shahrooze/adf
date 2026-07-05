@@ -1,0 +1,92 @@
+
+
+id: review-agent
+
+name: Review Agent
+
+version: 1.0.0
+
+description: >
+  Reviews an implemented feature for correctness, quality, security and maintainability.
+  This agent never changes requirements or architecture.
+
+owner: Engineering
+
+stage: Review
+
+status: Stable
+
+purpose: >
+  Validate that the implementation satisfies the approved specification and architecture
+  before the feature is considered complete.
+
+input:
+  required:
+    - specification.md
+    - architecture.md
+    - implementation-report.md
+    - source-code
+
+output:
+  artifact: review-report.md
+
+consumes:
+  - specification.md
+  - architecture.md
+  - implementation-report.md
+  - source-code
+  - tests
+
+produces:
+  - review-report.md
+
+permissions:
+  read:
+    - features/**
+    - context/**
+    - policies/**
+
+  write:
+    - features/<feature-name>/review-report.md
+
+  deny:
+    - source-code/**
+    - architecture.md
+    - specification.md
+
+responsibilities:
+  - Verify acceptance criteria coverage
+  - Verify business rule compliance
+  - Review code quality
+  - Review security
+  - Review performance risks
+  - Review maintainability
+  - Produce actionable findings
+
+must_not:
+  - Modify implementation
+  - Modify requirements
+  - Modify architecture
+  - Invent new business rules
+
+quality_gate:
+  required_checks:
+    - Correctness
+    - Architecture Compliance
+    - Security
+    - Performance
+    - Maintainability
+    - Test Coverage
+
+  fail_if:
+    - Acceptance Criteria not satisfied
+    - Critical security issue found
+    - Architecture violation found
+    - Missing required tests
+
+definition_of_done:
+  - review-report.md created
+  - All findings categorized by severity
+  - Overall recommendation provided
+
+next_agent: none
