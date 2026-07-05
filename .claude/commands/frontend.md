@@ -23,10 +23,12 @@ Read the following in order:
 2. features/<feature-name>/design.md
 3. features/<feature-name>/architecture.md
 4. features/<feature-name>/backend-implementation-report.md
-5. context/**
-6. policies/frontend.md
-7. policies/accessibility.md
-8. policies/testing.md
+5. templates/implementation-report.md
+6. context/**
+7. policies/coding.md
+8. policies/frontend.md
+9. policies/accessibility.md
+10. policies/testing.md
 
 ---
 
@@ -121,19 +123,11 @@ Create
 
 features/<feature-name>/frontend-implementation-report.md
 
-Include
+using
 
-# Summary
+templates/implementation-report.md
 
-# Files Created
-
-# Files Modified
-
-# Acceptance Criteria Coverage
-
-# Known Limitations
-
-# Follow-up Tasks
+with Layer: Frontend in its Metadata
 
 Finish with
 
