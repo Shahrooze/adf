@@ -24,7 +24,11 @@ Read the following in order:
 3. features/<feature-name>/architecture.md
 4. features/<feature-name>/architecture-review.md
 5. context/**
-6. policies/**
+6. policies/coding.md
+7. policies/security.md
+8. policies/architecture.md
+9. policies/api-design.md
+10. policies/testing.md
 
 Read design.md only to extract API contracts implied by screens and forms (payloads, states, validation surfaced to the client). Its visual and UX content is out of scope for this agent.
 

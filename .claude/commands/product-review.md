@@ -23,7 +23,7 @@ Read:
 - features/<feature-name>/specification.md
 - templates/product-review.md
 - context/**
-- policies/**
+- policies/quality-gates.md
 
 ---
 

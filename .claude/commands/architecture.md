@@ -25,7 +25,8 @@ Read:
 - features/<feature-name>/design.md
 - templates/architecture.md
 - context/**
-- policies/**
+- policies/architecture.md
+- policies/api-design.md
 
 ---
 

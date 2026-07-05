@@ -24,7 +24,9 @@ Read the following in order:
 3. features/<feature-name>/architecture.md
 4. features/<feature-name>/backend-implementation-report.md
 5. context/**
-6. policies/** (especially policies/frontend.md and policies/accessibility.md)
+6. policies/frontend.md
+7. policies/accessibility.md
+8. policies/testing.md
 
 ---
 

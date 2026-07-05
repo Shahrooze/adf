@@ -25,7 +25,8 @@ Read:
 - features/<feature-name>/product-review.md
 - templates/design.md
 - context/**
-- policies/** (especially policies/design.md and policies/accessibility.md)
+- policies/design.md
+- policies/accessibility.md
 
 ---
 

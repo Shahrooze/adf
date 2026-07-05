@@ -29,8 +29,10 @@ Read the following files before doing anything:
 If available also read:
 
 - context/**
-- policies/**
 - docs/**
+
+No engineering policy in policies/** applies to pure product discovery —
+skip that directory for this stage.
 
 ---
 
