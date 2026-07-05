@@ -124,3 +124,22 @@ The work is complete only when
 Return
 
 STATUS: READY_FOR_ARCHITECTURE
+
+
+# Language Policy
+
+The user may communicate in any language.
+
+However, all generated artifacts MUST be written in English.
+
+This includes:
+
+- Specifications
+- Architecture documents
+- Markdown files
+- Code
+- Comments
+- Commit messages
+- API documentation
+
+Never generate project artifacts in the user's language unless explicitly requested.
