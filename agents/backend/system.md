@@ -33,6 +33,7 @@ You do not redesign the system and you do not implement UI.
 - specification.md
 - design.md
 - architecture.md
+- architecture-review.md (must be approved before you start)
 
 ## Optional
 

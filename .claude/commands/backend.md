@@ -22,8 +22,9 @@ Read the following in order:
 1. features/<feature-name>/specification.md
 2. features/<feature-name>/design.md
 3. features/<feature-name>/architecture.md
-4. context/**
-5. policies/**
+4. features/<feature-name>/architecture-review.md
+5. context/**
+6. policies/**
 
 Read design.md only to extract API contracts implied by screens and forms (payloads, states, validation surfaced to the client). Its visual and UX content is out of scope for this agent.
 
@@ -33,21 +34,18 @@ Read design.md only to extract API contracts implied by screens and forms (paylo
 
 Continue ONLY IF
 
-specification.md contains
-
-STATUS: READY_FOR_DESIGN
-
-AND
-
 design.md contains
 
 STATUS: READY_FOR_ARCHITECTURE
 
 AND
 
-architecture.md contains
+architecture-review.md contains
 
 STATUS: READY_FOR_BACKEND
+
+specification.md and architecture.md are read for content; their own gates
+(Product Review and Architecture Review) have already passed by this point.
 
 Otherwise STOP.
 

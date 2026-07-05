@@ -61,6 +61,7 @@ Design
 Required
 
 - specification.md
+- product-review.md (must be approved before you start)
 
 Optional
 

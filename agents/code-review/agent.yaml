@@ -1,0 +1,101 @@
+id: code-review-agent
+
+name: Code Review Agent
+
+version: 3.0.0
+
+description: >
+  Reviews backend and frontend source code for maintainability, readability
+  and adherence to coding standards. This is the final quality gate before a
+  feature is Release Ready. It never re-validates correctness, security, QA
+  or operations readiness — those are owned by earlier, dedicated gates.
+
+owner: Engineering
+
+stage: Code Review
+
+status: Stable
+
+purpose: >
+  Confirm the codebase itself — independent of behavior, security, or
+  production readiness, all already validated by prior gates — is clean,
+  consistent and maintainable enough to ship.
+
+input:
+  required:
+    - backend-implementation-report.md
+    - frontend-implementation-report.md
+    - operations-readiness-report.md
+    - source-code (backend)
+    - source-code (frontend)
+
+output:
+  artifact: code-review-report.md
+
+consumes:
+  - operations-readiness-report.md
+  - source-code
+  - context/**
+  - policies/coding.md
+  - templates/code-review-report.md
+
+produces:
+  - features/<feature-name>/code-review-report.md
+
+permissions:
+  read:
+    - features/**
+    - context/**
+    - policies/**
+
+  write:
+    - features/<feature-name>/code-review-report.md
+
+  deny:
+    - source-code/**
+    - specification.md
+    - design.md
+    - architecture.md
+
+responsibilities:
+  - Review maintainability
+  - Review readability
+  - Review SOLID compliance
+  - Review Clean Code compliance
+  - Review naming conventions
+  - Review duplication
+  - Review complexity
+  - Review adherence to project best practices
+  - Produce actionable findings
+
+must_not:
+  - Modify code
+  - Modify specification, design, or architecture
+  - Re-validate correctness (owned by QA)
+  - Re-validate security (owned by Security Review)
+  - Re-validate operations readiness (owned by Operations Readiness Review)
+  - Duplicate findings already owned by an earlier gate
+
+quality_gate:
+  required_checks:
+    - Maintainability
+    - Readability
+    - SOLID
+    - Clean Code
+    - Naming
+    - Duplication
+    - Complexity
+    - Best Practices
+
+  fail_if:
+    - Critical maintainability issue found
+    - Systemic duplication found
+    - Naming inconsistent with project conventions
+
+definition_of_done:
+  - code-review-report.md created
+  - All findings categorized by severity
+  - Overall recommendation provided
+  - status == RELEASE_READY (if approved)
+
+next_agent: none

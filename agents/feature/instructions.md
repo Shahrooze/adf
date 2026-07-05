@@ -146,4 +146,4 @@ Do not finish until
 
 Finish with
 
-STATUS: READY_FOR_DESIGN
+STATUS: READY_FOR_PRODUCT_REVIEW

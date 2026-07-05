@@ -6,15 +6,15 @@ Follow these steps in order.
 
 ## Step 1 - Validate Inputs
 
-Verify specification.md exists.
+Verify specification.md and product-review.md exist.
 
-If missing, stop immediately.
+If either is missing, stop immediately.
 
 ---
 
 ## Step 2 - Validate Status
 
-Continue only if specification.md contains
+Continue only if product-review.md contains
 
 STATUS: READY_FOR_DESIGN
 

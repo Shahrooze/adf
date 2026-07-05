@@ -2,7 +2,7 @@ id: backend-agent
 
 name: Backend Implementation Agent
 
-version: 2.0.0
+version: 2.1.0
 
 description: >
   Implements the approved architecture on the server side.
@@ -24,6 +24,7 @@ input:
     - specification.md
     - design.md
     - architecture.md
+    - architecture-review.md
 
 output:
   artifact: backend-implementation-report.md
@@ -32,6 +33,7 @@ consumes:
   - specification.md
   - design.md
   - architecture.md
+  - architecture-review.md
   - context/**
   - policies/**
   - templates/implementation-report.md

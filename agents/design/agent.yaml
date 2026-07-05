@@ -2,12 +2,13 @@ id: design-agent
 
 name: Design Agent
 
-version: 1.0.0
+version: 1.1.0
 
 description: >
-  Transforms an approved Feature Specification into a complete UI/UX and
-  Product Design document. This agent defines the user-facing experience but
-  never implements code and never makes backend architecture decisions.
+  Transforms a Product-Review-approved Feature Specification into a complete
+  UI/UX and Product Design document. This agent defines the user-facing
+  experience but never implements code and never makes backend architecture
+  decisions.
 
 owner: Design
 
@@ -22,12 +23,14 @@ purpose: >
 input:
   required:
     - specification.md
+    - product-review.md
 
 output:
   artifact: design.md
 
 consumes:
   - specification.md
+  - product-review.md
   - context/**
   - policies/**
   - templates/design.md

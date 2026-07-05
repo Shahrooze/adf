@@ -9,6 +9,7 @@ Verify the following files exist:
 - specification.md
 - design.md
 - architecture.md
+- architecture-review.md
 
 If any file is missing, stop immediately.
 
@@ -18,9 +19,11 @@ If any file is missing, stop immediately.
 
 Continue only if:
 
-- specification.md contains `STATUS: READY_FOR_DESIGN`
 - design.md contains `STATUS: READY_FOR_ARCHITECTURE`
-- architecture.md contains `STATUS: READY_FOR_BACKEND`
+- architecture-review.md contains `STATUS: READY_FOR_BACKEND`
+
+specification.md and architecture.md are read for content; their own gates
+(Product Review and Architecture Review) have already passed by this point.
 
 Otherwise stop and explain why.
 

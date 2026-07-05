@@ -33,15 +33,13 @@ Read:
 
 Continue ONLY IF
 
-STATUS: READY_FOR_DESIGN
-
-exists inside specification.md
-
-AND
-
 STATUS: READY_FOR_ARCHITECTURE
 
 exists inside design.md
+
+specification.md is read for requirements traceability only; its own gate
+(Product Review) has already passed by the time design.md reaches this
+status.
 
 Otherwise stop.
 
@@ -103,4 +101,7 @@ Do NOT
 
 When finished
 
-STATUS: READY_FOR_BACKEND
+STATUS: READY_FOR_ARCHITECTURE_REVIEW
+
+This hands off to the Architecture Review Agent (`/architecture-review`),
+not directly to Backend Implementation.

@@ -2,7 +2,7 @@ id: architecture-agent
 
 name: Architecture Agent
 
-version: 2.0.0
+version: 2.1.0
 
 description: >
   Transforms an approved Feature Specification and Design document into a
@@ -92,6 +92,6 @@ definition_of_done:
 
   - architecture.md created
   - quality gate passed
-  - status == READY_FOR_BACKEND
+  - status == READY_FOR_ARCHITECTURE_REVIEW
 
-next_agent: backend-agent
+next_agent: architecture-review-agent

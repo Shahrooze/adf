@@ -167,7 +167,7 @@ Do not finish until
 
 Return
 
-STATUS: READY_FOR_REVIEW
+STATUS: READY_FOR_QA
 
 ---
 

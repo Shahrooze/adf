@@ -168,6 +168,9 @@ Health Checks
 
 - ASP.NET Health Checks
 
+This stack is the baseline the Operations Readiness Review Agent checks
+against — see policies/observability.md.
+
 ---
 
 # Testing

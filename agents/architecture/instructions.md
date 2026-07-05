@@ -15,13 +15,13 @@ Read
 
 Validate
 
-Specification must contain
-
-STATUS: READY_FOR_DESIGN
-
 Design must contain
 
 STATUS: READY_FOR_ARCHITECTURE
+
+specification.md is read for requirements traceability only; its own gate
+(Product Review) has already passed by the time design.md reaches this
+status.
 
 ---
 
@@ -86,4 +86,4 @@ Architecture completeness.
 
 Finish with
 
-STATUS: READY_FOR_BACKEND
+STATUS: READY_FOR_ARCHITECTURE_REVIEW

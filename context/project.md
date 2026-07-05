@@ -4,7 +4,7 @@
 
 Name: ADF (AI Development Framework)
 
-Version: 0.2.0
+Version: 0.3.0
 
 ---
 
@@ -32,7 +32,7 @@ ADF should support multiple LLM providers without changing agent logic.
 
 1. Every stage produces an artifact.
 
-2. Every artifact is reviewed.
+2. Every artifact is reviewed — by a dedicated agent, never by its own author.
 
 3. Agents communicate only through artifacts.
 
@@ -46,13 +46,21 @@ ADF should support multiple LLM providers without changing agent logic.
 
 8. Implementation never changes Design or Architecture decisions.
 
-9. Review never changes implementation, design, or architecture.
+9. Implementation is separated from quality validation: QA, Security Review, Operations Readiness Review and Code Review each own exactly one quality dimension and never duplicate another's findings.
+
+10. No reviewing agent modifies the artifact it is reviewing.
+
+11. A stage's gate is satisfied only by the immediately preceding artifact's own `STATUS:` line — never assumed.
 
 ---
 
 # Development Flow
 
 Feature
+
+↓
+
+Product Review
 
 ↓
 
@@ -64,6 +72,10 @@ Architecture
 
 ↓
 
+Architecture Review
+
+↓
+
 Backend Implementation
 
 ↓
@@ -72,7 +84,23 @@ Frontend Implementation
 
 ↓
 
-Review
+QA Validation
+
+↓
+
+Security Review
+
+↓
+
+Operations Readiness Review
+
+↓
+
+Code Review
+
+↓
+
+Release Ready
 
 ---
 
@@ -163,15 +191,17 @@ Always generate production-ready output.
 
 # Success Criteria
 
-A feature is complete only when
+A feature is Release Ready only when
 
-- Specification approved
-- Design approved
-- Architecture approved
+- Specification approved by Product Review
+- Design completed
+- Architecture approved by Architecture Review
 - Backend Implementation completed
 - Frontend Implementation completed
-- Review approved
-- Tests available
+- QA Validation approved (zero Acceptance Criteria or Business Rule coverage gaps)
+- Security Review approved (no unresolved Critical/High finding)
+- Operations Readiness Review approved
+- Code Review approved
 - Documentation updated
 
 ---
@@ -180,7 +210,7 @@ A feature is complete only when
 
 ADF is not responsible for
 
-- Deployment
+- Executing deployments (Operations Readiness Review validates readiness for deployment, it does not deploy)
 - Infrastructure provisioning
 - CI/CD execution
 - Project management

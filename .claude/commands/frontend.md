@@ -38,15 +38,13 @@ STATUS: READY_FOR_ARCHITECTURE
 
 AND
 
-architecture.md contains
-
-STATUS: READY_FOR_BACKEND
-
-AND
-
 backend-implementation-report.md contains
 
 STATUS: READY_FOR_FRONTEND
+
+architecture.md is read for API contract details; its own gate (Architecture
+Review) has already passed by the time backend-implementation-report.md
+reaches this status.
 
 Otherwise STOP.
 
@@ -137,4 +135,6 @@ Include
 
 Finish with
 
-STATUS: READY_FOR_REVIEW
+STATUS: READY_FOR_QA
+
+This hands off to the QA Agent (`/qa`), not directly to Code Review.

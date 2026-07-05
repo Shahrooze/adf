@@ -8,6 +8,8 @@ ADF (AI Development Framework) is an opinionated framework for AI-assisted softw
 
 Instead of asking an LLM to generate an entire application in a single prompt, ADF breaks software development into well-defined engineering stages. Each stage has a single responsibility, a dedicated AI agent, explicit inputs, and predictable outputs.
 
+Implementation is strictly separated from quality validation: Backend and Frontend Implementation only build; QA, Security Review, Operations Readiness Review and Code Review each independently validate exactly one quality dimension.
+
 The goal is to make AI-generated software more maintainable, reviewable, and production-ready.
 
 ⸻
@@ -20,7 +22,7 @@ AI should participate in the software engineering process, not replace it.
 
 Every stage produces an artifact.
 
-Every artifact can be reviewed.
+Every artifact is reviewed by a dedicated agent — never by its own author.
 
 Every decision is traceable.
 
@@ -33,40 +35,40 @@ Workflow
 Idea
     │
     ▼
-Feature Agent
+Feature Agent → specification.md
     │
     ▼
-Specification
+Product Review Agent → product-review.md
     │
     ▼
-Design Agent
+Design Agent → design.md
     │
     ▼
-Design
+Architecture Agent → architecture.md
     │
     ▼
-Architecture Agent
+Architecture Review Agent → architecture-review.md
     │
     ▼
-Architecture
+Backend Implementation Agent → backend-implementation-report.md
     │
     ▼
-Backend Implementation Agent
+Frontend Implementation Agent → frontend-implementation-report.md
     │
     ▼
-Backend Code
+QA Agent → qa-report.md
     │
     ▼
-Frontend Implementation Agent
+Security Review Agent → security-review.md
     │
     ▼
-Frontend Code
+Operations Readiness Review Agent → operations-readiness-report.md
     │
     ▼
-Review Agent
+Code Review Agent → code-review-report.md
     │
     ▼
-Production Ready Feature
+Release Ready
 
 ⸻
 
@@ -82,9 +84,23 @@ Responsible for:
 * Acceptance criteria
 * Non-functional requirements
 
-Output:
+Output: specification.md
 
-specification.md
+⸻
+
+Product Review Agent
+
+Independently validates the specification before Design begins. Never writes the specification.
+
+Responsible for:
+
+* Business goal clarity
+* Requirement completeness
+* Acceptance criteria quality
+* Business rule consistency
+* Ambiguity detection
+
+Output: product-review.md
 
 ⸻
 
@@ -103,9 +119,7 @@ Responsible for:
 
 Never makes backend, database, or API design decisions.
 
-Output:
-
-design.md
+Output: design.md
 
 ⸻
 
@@ -122,9 +136,23 @@ Responsible for:
 
 Never makes UI or UX decisions — those belong to the Design Agent.
 
-Output:
+Output: architecture.md
 
-architecture.md
+⸻
+
+Architecture Review Agent
+
+Independently validates the architecture before Backend Implementation begins. Never writes the architecture.
+
+Responsible for:
+
+* DDD compliance
+* Clean Architecture compliance
+* Scalability
+* API consistency
+* Database design
+
+Output: architecture-review.md
 
 ⸻
 
@@ -140,10 +168,7 @@ Responsible for:
 
 Never implements UI.
 
-Output:
-
-Backend Source Code
-backend-implementation-report.md
+Output: Backend Source Code, backend-implementation-report.md
 
 ⸻
 
@@ -160,27 +185,88 @@ Responsible for:
 
 Never redesigns UX. Never implements backend logic.
 
-Output:
-
-Frontend Source Code
-frontend-implementation-report.md
+Output: Frontend Source Code, frontend-implementation-report.md
 
 ⸻
 
-Review Agent
+QA Agent
+
+Independently validates test coverage and the Definition of Done. Never modifies production code.
 
 Responsible for:
 
-* Independent review of Specification, Design, Architecture, Backend and Frontend
-* Security review
-* Accessibility review
-* Architecture compliance
-* Acceptance criteria verification
-* Final recommendation
+* Generating test scenarios
+* Acceptance criteria coverage
+* Business rule coverage
+* Missing test case / edge case detection
+* Test plan
+* Definition of Done verification
 
-Output:
+Output: qa-report.md
 
-review-report.md
+⸻
+
+Security Review Agent
+
+Independently reviews for vulnerabilities. Never modifies code.
+
+Responsible for:
+
+* Authentication and authorization
+* Secret management
+* OWASP Top 10
+* API security
+* Input validation
+* Sensitive data exposure
+
+Output: security-review.md
+
+⸻
+
+Operations Readiness Review Agent
+
+Independently validates production readiness. Never modifies implementation.
+
+Responsible for:
+
+* Logging, metrics, distributed tracing
+* Health checks (readiness/liveness probes)
+* Configuration and secrets management
+* Retry, timeout and idempotency policies
+* Rate limiting
+* Performance and scalability
+* Docker/Kubernetes readiness
+* Monitoring and alerting readiness
+* Deployment and rollback strategy
+
+Output: operations-readiness-report.md
+
+⸻
+
+Code Review Agent
+
+The final gate. Reviews only code quality — never re-validates correctness (QA), security (Security Review), or production readiness (Operations Readiness Review).
+
+Responsible for:
+
+* Maintainability
+* Readability
+* SOLID
+* Clean Code
+* Naming
+* Duplication
+* Complexity
+* Best practices
+
+Output: code-review-report.md
+
+⸻
+
+Quality Gates
+
+Every stage is guarded by a Quality Gate: the next stage cannot start until the required artifact exists and reaches its passing status. See policies/quality-gates.md for Pass Criteria, Fail Criteria, Required Artifacts and Blocking Conditions for every gate, and workflows/feature-development.yaml for the machine-readable definitions.
+
+Feature Gate → Product Gate → Design Gate → Architecture Gate → Backend Gate → Frontend Gate → QA Gate → Security Gate → Operations Gate → Code Quality Gate → Release Gate
 
 ⸻
 
@@ -217,10 +303,14 @@ Examples:
 * Coding
 * Security
 * Architecture
+* API Design
+* Testing
+* Observability
 * Git
 * Design
 * Accessibility
 * Frontend
+* Quality Gates
 
 ⸻
 
@@ -231,10 +321,15 @@ Every artifact is generated from a template.
 Current templates include:
 
 * Specification
+* Product Review
 * Design
 * Architecture
+* Architecture Review
 * Implementation Report (shared by Backend and Frontend)
-* Review Report
+* QA Report
+* Security Review
+* Operations Readiness Report
+* Code Review Report
 
 ⸻
 
@@ -264,6 +359,8 @@ Principles
 * Business decisions never leak into implementation.
 * UX/UI decisions never leak into backend architecture.
 * Architecture decisions never leak into product discovery.
+* Implementation is separated from quality validation — QA, Security Review, Operations Readiness Review and Code Review each own exactly one quality dimension and never duplicate another's findings.
+* No reviewing agent modifies the artifact it reviews.
 * Deterministic outputs whenever possible.
 * Reuse existing project context instead of repeating prompts.
 
@@ -275,17 +372,27 @@ Idea
 ↓
 Feature Specification
 ↓
-Design
+Product Review
 ↓
-Architecture Design
+UX / Design
+↓
+Architecture
+↓
+Architecture Review
 ↓
 Backend Implementation
 ↓
 Frontend Implementation
 ↓
-Review
+QA Validation
 ↓
-Production
+Security Review
+↓
+Operations Readiness Review
+↓
+Code Review
+↓
+Release Ready
 
 ⸻
 

@@ -116,5 +116,5 @@ Important implementation decisions.
 STATUS: READY_FOR_FRONTEND
 
 > Backend Layer finishes with STATUS: READY_FOR_FRONTEND.
-> Frontend Layer finishes with STATUS: READY_FOR_REVIEW.
+> Frontend Layer finishes with STATUS: READY_FOR_QA.
 > Use exactly one status line in the generated document — the one matching this report's Layer.

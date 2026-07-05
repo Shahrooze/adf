@@ -20,8 +20,11 @@ If any file is missing, stop immediately.
 Continue only if:
 
 - design.md contains `STATUS: READY_FOR_ARCHITECTURE`
-- architecture.md contains `STATUS: READY_FOR_BACKEND`
 - backend-implementation-report.md contains `STATUS: READY_FOR_FRONTEND`
+
+architecture.md is read for API contract details; its own gate (Architecture
+Review) has already passed by the time backend-implementation-report.md
+reaches this status.
 
 Otherwise stop and explain why.
 
@@ -111,4 +114,4 @@ Create `frontend-implementation-report.md` containing:
 
 Finish with:
 
-`STATUS: READY_FOR_REVIEW`
+`STATUS: READY_FOR_QA`

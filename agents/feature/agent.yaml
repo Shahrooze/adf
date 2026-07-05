@@ -2,7 +2,7 @@ id: feature-agent
 
 name: Feature Agent
 
-version: 2.0.0
+version: 3.0.0
 
 description: |
   Converts a raw feature idea into a complete Feature Specification.
@@ -81,4 +81,4 @@ failure_conditions:
   - Unresolved critical questions
   - Contradictory business rules
 
-next_agent: design-agent
+next_agent: product-review-agent

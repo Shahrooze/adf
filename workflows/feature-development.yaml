@@ -2,11 +2,14 @@ id: feature-development
 
 name: Feature Development Workflow
 
-version: 2.0.0
+version: 3.0.0
 
 description: |
   Standard workflow for implementing a new feature using ADF.
   Every stage must pass its quality gate before the next stage starts.
+  Implementation (Backend, Frontend) is strictly separated from quality
+  validation (QA, Security Review, Operations Readiness Review, Code Review).
+  See policies/quality-gates.md for the human-readable gate reference.
 
 trigger:
   type: feature
@@ -17,20 +20,63 @@ stages:
     produces:
       - specification.md
     gate:
-      required:
+      name: Feature Gate
+      required_artifacts:
         - specification.md
+      status: READY_FOR_PRODUCT_REVIEW
+      pass_criteria:
+        - Business Goal is clear and measurable
+        - Every Functional Requirement has an Acceptance Criterion
+        - No unresolved critical Open Question
+      fail_criteria:
+        - Business Goal missing or unmeasurable
+        - Any Functional Requirement lacks an Acceptance Criterion
+        - Contradictory Business Rules
+      blocking_conditions:
+        - Any fail_criteria condition present
+
+  - id: product-review
+    agent: product-review-agent
+    consumes:
+      - specification.md
+    produces:
+      - product-review.md
+    gate:
+      name: Product Gate
+      required_artifacts:
+        - product-review.md
       status: READY_FOR_DESIGN
+      pass_criteria:
+        - Recommendation is APPROVED or APPROVED_WITH_COMMENTS
+      fail_criteria:
+        - Acceptance Criterion not testable/observable/binary
+        - Business Rule contradiction found
+        - Blocking Open Question unresolved
+      blocking_conditions:
+        - Any Critical or High finding
 
   - id: design
     agent: design-agent
     consumes:
       - specification.md
+      - product-review.md
     produces:
       - design.md
     gate:
-      required:
+      name: Design Gate
+      required_artifacts:
         - design.md
       status: READY_FOR_ARCHITECTURE
+      pass_criteria:
+        - Every Functional Requirement maps to at least one screen
+        - Every data-driven screen documents Loading, Empty, Error and Success states
+        - Accessibility documented per screen
+      fail_criteria:
+        - Missing screen for a Functional Requirement
+        - Missing state for a data-driven screen
+        - Unresolved Blocking Open UX Question
+      blocking_conditions:
+        - Any fail_criteria condition present
 
   - id: architecture
     agent: architecture-agent
@@ -40,9 +86,33 @@ stages:
     produces:
       - architecture.md
     gate:
-      required:
+      name: (feeds Architecture Gate, enforced by architecture-review)
+      required_artifacts:
         - architecture.md
+      status: READY_FOR_ARCHITECTURE_REVIEW
+
+  - id: architecture-review
+    agent: architecture-review-agent
+    consumes:
+      - specification.md
+      - design.md
+      - architecture.md
+    produces:
+      - architecture-review.md
+    gate:
+      name: Architecture Gate
+      required_artifacts:
+        - architecture-review.md
       status: READY_FOR_BACKEND
+      pass_criteria:
+        - Recommendation is APPROVED or APPROVED_WITH_COMMENTS
+      fail_criteria:
+        - Layer boundary violation
+        - Unmitigated scalability risk
+        - API inconsistent with policies/api-design.md
+        - Missing database migration strategy
+      blocking_conditions:
+        - Any Critical or High finding
 
   - id: backend-implementation
     agent: backend-agent
@@ -50,14 +120,26 @@ stages:
       - specification.md
       - design.md
       - architecture.md
+      - architecture-review.md
     produces:
       - backend-implementation-report.md
       - backend-source-code
       - backend-tests
     gate:
-      required:
+      name: Backend Gate
+      required_artifacts:
         - backend-implementation-report.md
       status: READY_FOR_FRONTEND
+      pass_criteria:
+        - Backend code compiles
+        - Backend tests pass
+        - API contracts documented for every screen/form in design.md
+      fail_criteria:
+        - Unimplemented Functional Requirement
+        - Business Rule not honored
+        - API contract undocumented
+      blocking_conditions:
+        - Any fail_criteria condition present
 
   - id: frontend-implementation
     agent: frontend-agent
@@ -71,34 +153,148 @@ stages:
       - frontend-source-code
       - frontend-tests
     gate:
-      required:
+      name: Frontend Gate
+      required_artifacts:
         - frontend-implementation-report.md
-      status: READY_FOR_REVIEW
+      status: READY_FOR_QA
+      pass_criteria:
+        - Frontend code compiles
+        - Frontend tests pass
+        - design.md followed exactly
+        - Every API call matches the contracts in backend-implementation-report.md
+      fail_criteria:
+        - Screen/component/state missing versus design.md
+        - API call not matching documented contract
+      blocking_conditions:
+        - Any fail_criteria condition present
 
-  - id: review
-    agent: review-agent
+  - id: qa
+    agent: qa-agent
     consumes:
       - specification.md
       - design.md
+      - backend-implementation-report.md
+      - frontend-implementation-report.md
+    produces:
+      - qa-report.md
+    gate:
+      name: QA Gate
+      required_artifacts:
+        - qa-report.md
+      status: READY_FOR_SECURITY_REVIEW
+      pass_criteria:
+        - Recommendation is APPROVED or APPROVED_WITH_COMMENTS
+        - Zero unresolved Acceptance Criteria or Business Rule coverage Gaps
+      fail_criteria:
+        - Any Acceptance Criterion is a Gap
+        - Any Business Rule is a Gap
+        - Definition of Done not met
+      blocking_conditions:
+        - Any Gap
+        - Any Critical or High finding
+
+  - id: security-review
+    agent: security-review-agent
+    consumes:
       - architecture.md
       - backend-implementation-report.md
       - frontend-implementation-report.md
+      - qa-report.md
+    produces:
+      - security-review.md
+    gate:
+      name: Security Gate
+      required_artifacts:
+        - security-review.md
+      status: READY_FOR_OPERATIONS_REVIEW
+      pass_criteria:
+        - Recommendation is APPROVED or APPROVED_WITH_COMMENTS
+      fail_criteria:
+        - Protected endpoint missing authentication or authorization
+        - Hardcoded secret found
+        - Injection vector found
+        - Sensitive data exposed
+      blocking_conditions:
+        - Any Critical or High finding
+
+  - id: operations-readiness
+    agent: operations-readiness-agent
+    consumes:
+      - architecture.md
+      - backend-implementation-report.md
+      - frontend-implementation-report.md
+      - security-review.md
+    produces:
+      - operations-readiness-report.md
+    gate:
+      name: Operations Gate
+      required_artifacts:
+        - operations-readiness-report.md
+      status: READY_FOR_CODE_REVIEW
+      pass_criteria:
+        - Recommendation is APPROVED or APPROVED_WITH_COMMENTS
+      fail_criteria:
+        - New API without health check coverage
+        - No structured logging for new error paths
+        - No rollback strategy documented
+        - Unsafe operation not idempotent
+        - Missing timeout on an external call
+      blocking_conditions:
+        - Any Critical or High finding
+
+  - id: code-review
+    agent: code-review-agent
+    consumes:
+      - backend-implementation-report.md
+      - frontend-implementation-report.md
+      - operations-readiness-report.md
       - backend-source-code
       - frontend-source-code
-      - backend-tests
-      - frontend-tests
     produces:
-      - review-report.md
+      - code-review-report.md
     gate:
-      required:
-        - review-report.md
-      status: COMPLETED
+      name: Code Quality Gate
+      required_artifacts:
+        - code-review-report.md
+      status: RELEASE_READY
+      pass_criteria:
+        - Recommendation is APPROVED or APPROVED_WITH_COMMENTS
+      fail_criteria:
+        - Critical maintainability issue found
+        - Systemic duplication found
+        - Naming inconsistent with project conventions
+      blocking_conditions:
+        - Any Critical or High finding
+
+  - id: release
+    gate:
+      name: Release Gate
+      required_artifacts:
+        - product-review.md
+        - design.md
+        - architecture-review.md
+        - backend-implementation-report.md
+        - frontend-implementation-report.md
+        - qa-report.md
+        - security-review.md
+        - operations-readiness-report.md
+        - code-review-report.md
+      pass_criteria:
+        - Every prior gate passed
+        - code-review-report.md contains STATUS: RELEASE_READY
+      fail_criteria:
+        - Any prior gate not passed
+      blocking_conditions:
+        - Any missing artifact
+        - Any prior gate in a failed state
 
 rules:
   - Every stage is stateless.
   - Agents communicate only through artifacts.
   - No agent may modify artifacts owned by a previous stage.
+  - No reviewing agent (Product Review, Architecture Review, QA, Security Review, Operations Readiness Review, Code Review) may modify the artifact it reviews.
   - Design owns UX/UI decisions; Architecture owns technical/system decisions.
   - Backend Implementation never implements UI; Frontend Implementation never implements backend logic.
+  - QA owns correctness/coverage; Security Review owns security; Operations Readiness Review owns production readiness; Code Review owns maintainability only — none may duplicate another's findings.
   - A failed gate stops the workflow.
   - Human approval is required before moving to the next stage.
