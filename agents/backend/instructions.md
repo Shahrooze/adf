@@ -1,6 +1,4 @@
-
-
-# Implementation Workflow
+# Backend Implementation Workflow
 
 Follow these steps in order.
 
@@ -9,9 +7,10 @@ Follow these steps in order.
 Verify the following files exist:
 
 - specification.md
+- design.md
 - architecture.md
 
-If either file is missing, stop immediately.
+If any file is missing, stop immediately.
 
 ---
 
@@ -19,8 +18,9 @@ If either file is missing, stop immediately.
 
 Continue only if:
 
-- specification.md contains `STATUS: READY_FOR_ARCHITECTURE`
-- architecture.md contains `STATUS: READY_FOR_IMPLEMENTATION`
+- specification.md contains `STATUS: READY_FOR_DESIGN`
+- design.md contains `STATUS: READY_FOR_ARCHITECTURE`
+- architecture.md contains `STATUS: READY_FOR_BACKEND`
 
 Otherwise stop and explain why.
 
@@ -37,7 +37,19 @@ Pay particular attention to coding standards, security policies, and project arc
 
 ---
 
-## Step 4 - Create Implementation Plan
+## Step 4 - Extract API Contracts from Design
+
+Read design.md only for:
+
+- Screens and forms that require server data
+- Validation Rules
+- Loading, Empty, Error and Success States that imply API responses
+
+Do not read design.md for visual or UX guidance. That is out of scope for this agent.
+
+---
+
+## Step 5 - Create Implementation Plan
 
 Before writing code, create a short implementation plan.
 
@@ -50,7 +62,7 @@ The plan should identify:
 
 ---
 
-## Step 5 - Implement
+## Step 6 - Implement
 
 Implement the feature in the following order:
 
@@ -58,27 +70,29 @@ Implement the feature in the following order:
 2. Application
 3. Infrastructure
 4. API
-5. Frontend (if applicable)
-6. Tests
+5. Tests
 
 Never skip layers.
 
+Never implement frontend code.
+
 ---
 
-## Step 6 - Self Review
+## Step 7 - Self Review
 
 Verify:
 
 - All Acceptance Criteria are implemented.
 - No Business Rules are violated.
+- API contracts satisfy every screen and form in design.md.
 - No unnecessary code was introduced.
 - Existing functionality is preserved.
 
 ---
 
-## Step 7 - Generate Report
+## Step 8 - Generate Report
 
-Create `implementation-report.md` containing:
+Create `backend-implementation-report.md` containing:
 
 - Summary
 - Files Created
@@ -89,4 +103,4 @@ Create `implementation-report.md` containing:
 
 Finish with:
 
-`STATUS: READY_FOR_REVIEW`
+`STATUS: READY_FOR_FRONTEND`

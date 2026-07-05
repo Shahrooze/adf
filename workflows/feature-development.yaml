@@ -1,6 +1,8 @@
 id: feature-development
+
 name: Feature Development Workflow
-version: 1.0.0
+
+version: 2.0.0
 
 description: |
   Standard workflow for implementing a new feature using ADF.
@@ -17,41 +19,74 @@ stages:
     gate:
       required:
         - specification.md
+      status: READY_FOR_DESIGN
+
+  - id: design
+    agent: design-agent
+    consumes:
+      - specification.md
+    produces:
+      - design.md
+    gate:
+      required:
+        - design.md
       status: READY_FOR_ARCHITECTURE
 
   - id: architecture
     agent: architecture-agent
     consumes:
       - specification.md
+      - design.md
     produces:
       - architecture.md
     gate:
       required:
         - architecture.md
-      status: READY_FOR_IMPLEMENTATION
+      status: READY_FOR_BACKEND
 
-  - id: implementation
-    agent: implementation-agent
+  - id: backend-implementation
+    agent: backend-agent
     consumes:
       - specification.md
+      - design.md
       - architecture.md
     produces:
-      - implementation-report.md
-      - source-code
-      - tests
+      - backend-implementation-report.md
+      - backend-source-code
+      - backend-tests
     gate:
       required:
-        - implementation-report.md
+        - backend-implementation-report.md
+      status: READY_FOR_FRONTEND
+
+  - id: frontend-implementation
+    agent: frontend-agent
+    consumes:
+      - specification.md
+      - design.md
+      - architecture.md
+      - backend-implementation-report.md
+    produces:
+      - frontend-implementation-report.md
+      - frontend-source-code
+      - frontend-tests
+    gate:
+      required:
+        - frontend-implementation-report.md
       status: READY_FOR_REVIEW
 
   - id: review
     agent: review-agent
     consumes:
       - specification.md
+      - design.md
       - architecture.md
-      - implementation-report.md
-      - source-code
-      - tests
+      - backend-implementation-report.md
+      - frontend-implementation-report.md
+      - backend-source-code
+      - frontend-source-code
+      - backend-tests
+      - frontend-tests
     produces:
       - review-report.md
     gate:
@@ -63,5 +98,7 @@ rules:
   - Every stage is stateless.
   - Agents communicate only through artifacts.
   - No agent may modify artifacts owned by a previous stage.
+  - Design owns UX/UI decisions; Architecture owns technical/system decisions.
+  - Backend Implementation never implements UI; Frontend Implementation never implements backend logic.
   - A failed gate stops the workflow.
   - Human approval is required before moving to the next stage.

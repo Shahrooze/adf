@@ -203,10 +203,6 @@ Mitigation
 
 -
 
-## Frontend
-
--
-
 ## Database
 
 -
@@ -215,6 +211,8 @@ Mitigation
 
 -
 
+Frontend implementation tasks are owned by the Frontend Agent and driven by design.md, not by this document.
+
 ---
 
-STATUS: READY_FOR_IMPLEMENTATION
+STATUS: READY_FOR_BACKEND

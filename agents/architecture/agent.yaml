@@ -2,11 +2,12 @@ id: architecture-agent
 
 name: Architecture Agent
 
-version: 1.0.0
+version: 2.0.0
 
 description: >
-  Transforms an approved Feature Specification into a complete technical architecture.
-  This agent defines the system design but never implements code.
+  Transforms an approved Feature Specification and Design document into a
+  complete technical architecture. This agent defines the system design but
+  never implements code and never makes UI/UX decisions.
 
 owner: Engineering
 
@@ -15,18 +16,20 @@ stage: Architecture
 status: Stable
 
 purpose: >
-  Produce a complete architecture document that implementation agents can execute
-  without making architectural decisions.
+  Produce a complete architecture document that the Backend Agent and the
+  Frontend Agent can execute without making architectural or UX decisions.
 
 input:
   required:
     - specification.md
+    - design.md
 
 output:
   artifact: architecture.md
 
 consumes:
   - specification.md
+  - design.md
   - context/**
   - policies/**
   - templates/architecture.md
@@ -65,7 +68,10 @@ must_not:
   - Write code
   - Generate SQL migrations
   - Implement UI
+  - Make UI/UX decisions
+  - Override Design Agent decisions
   - Modify requirements
+  - Modify design.md
   - Invent business rules
 
 quality_gate:
@@ -86,6 +92,6 @@ definition_of_done:
 
   - architecture.md created
   - quality gate passed
-  - status == READY_FOR_IMPLEMENTATION
+  - status == READY_FOR_BACKEND
 
-next_agent: implementation-agent
+next_agent: backend-agent

@@ -146,4 +146,4 @@ Do not finish until
 
 Finish with
 
-STATUS: READY_FOR_ARCHITECTURE
+STATUS: READY_FOR_DESIGN

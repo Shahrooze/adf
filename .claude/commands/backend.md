@@ -1,15 +1,17 @@
 ---
-description: Implement an approved feature.
+description: Implement the backend of an approved feature.
 argument-hint: <feature-name>
 ---
 
-# Implementation Command
+# Backend Implementation Command
 
-You are executing the ADF Implementation Agent.
+You are executing the ADF Backend Implementation Agent.
 
 ## Objective
 
-Implement the feature described in the approved architecture.
+Implement the backend (Domain, Application, Infrastructure, API) of the feature described in the approved architecture.
+
+Never implement UI. Never make UI/UX decisions.
 
 ---
 
@@ -18,9 +20,12 @@ Implement the feature described in the approved architecture.
 Read the following in order:
 
 1. features/<feature-name>/specification.md
-2. features/<feature-name>/architecture.md
-3. context/**
-4. policies/**
+2. features/<feature-name>/design.md
+3. features/<feature-name>/architecture.md
+4. context/**
+5. policies/**
+
+Read design.md only to extract API contracts implied by screens and forms (payloads, states, validation surfaced to the client). Its visual and UX content is out of scope for this agent.
 
 ---
 
@@ -30,13 +35,19 @@ Continue ONLY IF
 
 specification.md contains
 
+STATUS: READY_FOR_DESIGN
+
+AND
+
+design.md contains
+
 STATUS: READY_FOR_ARCHITECTURE
 
 AND
 
 architecture.md contains
 
-STATUS: READY_FOR_IMPLEMENTATION
+STATUS: READY_FOR_BACKEND
 
 Otherwise STOP.
 
@@ -46,11 +57,15 @@ Otherwise STOP.
 
 Never change the Specification.
 
+Never change the Design.
+
 Never change the Architecture.
 
 Never invent new requirements.
 
 Never skip Acceptance Criteria.
+
+Never implement frontend code.
 
 ---
 
@@ -60,9 +75,8 @@ Never skip Acceptance Criteria.
 2. Application
 3. Infrastructure
 4. API
-5. Frontend (if required)
-6. Tests
-7. Documentation
+5. Tests
+6. Documentation
 
 ---
 
@@ -74,15 +88,7 @@ Never skip Acceptance Criteria.
 - Keep business logic inside the Domain/Application layers
 - No business logic inside controllers
 - Follow existing project conventions
-
----
-
-## Frontend Rules
-
-- Follow existing design system
-- Reuse existing components
-- Do not duplicate UI
-- Respect API contracts
+- Ensure every screen and form in design.md is covered by an API contract
 
 ---
 
@@ -105,12 +111,13 @@ Verify
 - No TODO left
 - No compilation errors
 - Tests generated
+- API contracts cover every screen/form in design.md
 
 ---
 
 Create
 
-features/<feature-name>/implementation-report.md
+features/<feature-name>/backend-implementation-report.md
 
 Include
 
@@ -128,4 +135,4 @@ Include
 
 Finish with
 
-STATUS: READY_FOR_REVIEW
+STATUS: READY_FOR_FRONTEND

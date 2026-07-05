@@ -11,8 +11,10 @@ Verify the following files exist.
 Required:
 
 - specification.md
+- design.md
 - architecture.md
-- implementation-report.md
+- backend-implementation-report.md
+- frontend-implementation-report.md
 
 If any required file is missing,
 
@@ -26,7 +28,7 @@ Explain what is missing.
 
 Continue only if
 
-implementation-report.md contains
+frontend-implementation-report.md contains
 
 STATUS: READY_FOR_REVIEW
 
@@ -46,35 +48,38 @@ Pay special attention to
 - Coding Standards
 - Security Policies
 - Architecture Rules
+- Accessibility Policy
+- Frontend Policy
+- Design Policy
 - Performance Rules
 
 ---
 
-# Step 4 - Review Specification Compliance
+# Step 4 - Review Specification
 
-Verify every
+Verify the specification is internally consistent.
 
-Functional Requirement
+Check for contradictory Business Rules or Acceptance Criteria that only
+became visible once Design, Architecture, Backend and Frontend were built.
 
-has been implemented.
-
-Verify every
-
-Business Rule
-
-has been respected.
-
-Verify every
-
-Acceptance Criterion
-
-is satisfied.
-
-Record every missing item.
+Record every issue under Stage: Specification.
 
 ---
 
-# Step 5 - Review Architecture Compliance
+# Step 5 - Review Design
+
+Verify
+
+- Every Functional Requirement maps to a screen in design.md
+- Every data-driven screen documents Loading, Empty, Error and Success states
+- Accessibility is documented per screen
+- Design Tokens are defined or reused consistently
+
+Record every issue under Stage: Design.
+
+---
+
+# Step 6 - Review Architecture
 
 Verify
 
@@ -84,27 +89,41 @@ Verify
 - API contracts
 - Database design
 - Domain model
+- Architecture does not encode UI/UX decisions that belong to Design
 
-Record every violation.
-
----
-
-# Step 6 - Review Code Quality
-
-Inspect
-
-- Readability
-- Complexity
-- Duplication
-- SOLID
-- Clean Architecture
-- Error Handling
-
-Record improvements.
+Record every issue under Stage: Architecture.
 
 ---
 
-# Step 7 - Review Security
+# Step 7 - Review Backend
+
+Verify
+
+- Every Functional Requirement is implemented
+- Every Business Rule is respected
+- API contracts cover every screen and form in design.md
+- Code quality (readability, complexity, duplication, SOLID, Clean Architecture)
+- Error handling
+
+Record every issue under Stage: Backend.
+
+---
+
+# Step 8 - Review Frontend
+
+Verify
+
+- Every screen, component, form and state in design.md is implemented exactly
+- Every API call matches the contract documented by the Backend
+- Responsive Behavior matches design.md
+- No UX decision was invented by the Frontend Agent
+- Code quality (component structure, reuse, readability)
+
+Record every issue under Stage: Frontend.
+
+---
+
+# Step 9 - Review Security
 
 Inspect
 
@@ -114,12 +133,26 @@ Inspect
 - Sensitive Data
 - Secret Handling
 - Injection Risks
+- Frontend exposure of data or logic that belongs server-side
 
-Record every issue.
+Record every issue with the appropriate Stage (Backend or Frontend).
 
 ---
 
-# Step 8 - Review Performance
+# Step 10 - Review Accessibility
+
+Inspect every screen against policies/accessibility.md
+
+- Keyboard navigability
+- Focus order
+- Color contrast
+- Screen reader labeling
+
+Record every issue under Stage: Frontend.
+
+---
+
+# Step 11 - Review Performance
 
 Inspect
 
@@ -129,29 +162,33 @@ Inspect
 - Large Memory Allocations
 - Blocking Calls
 - Expensive Loops
+- Unnecessary client-side re-renders or bundle size regressions
 
-Record findings.
+Record findings with the appropriate Stage (Backend or Frontend).
 
 ---
 
-# Step 9 - Review Tests
+# Step 12 - Review Tests
 
 Verify
 
 - Acceptance Criteria Coverage
 - Business Rule Coverage
-- Unit Tests
-- Integration Tests
+- Backend Unit Tests
+- Backend Integration Tests
+- Frontend Component Tests
+- Frontend API Integration Tests
 
-Record missing tests.
+Record missing tests with the appropriate Stage.
 
 ---
 
-# Step 10 - Assign Severity
+# Step 13 - Assign Severity
 
 Each finding must contain
 
 - ID
+- Stage
 - Severity
 - Category
 - Description
@@ -166,7 +203,7 @@ Allowed Severity
 
 ---
 
-# Step 11 - Produce Review Report
+# Step 14 - Produce Review Report
 
 Create
 
@@ -179,6 +216,24 @@ using this structure
 # Overall Result
 
 # Findings
+
+# Specification Review
+
+# Design Review
+
+# Architecture Review
+
+# Backend Review
+
+# Frontend Review
+
+# Security Review
+
+# Accessibility Review
+
+# Performance Review
+
+# Test Coverage Review
 
 # Positive Observations
 
@@ -232,16 +287,20 @@ issues exist.
 
 ---
 
-# Step 12 - Final Validation
+# Step 15 - Final Validation
 
 Verify
 
-- Every Acceptance Criterion reviewed
-- Every Business Rule reviewed
+- Specification reviewed
+- Design reviewed
 - Architecture reviewed
+- Backend reviewed
+- Frontend reviewed
 - Security reviewed
+- Accessibility reviewed
 - Performance reviewed
 - Test coverage reviewed
+- Every finding attributed to exactly one Stage
 
 If anything is missing
 

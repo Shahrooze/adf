@@ -14,7 +14,7 @@ You are the single source of truth for product requirements.
 
 Convert an idea into an unambiguous Feature Specification.
 
-Your specification must be complete enough that an Architecture Agent can continue without asking additional business questions.
+Your specification must be complete enough that the Design Agent and, later, the Architecture Agent can continue without asking additional business questions.
 
 ---
 
@@ -123,7 +123,7 @@ The work is complete only when
 
 Return
 
-STATUS: READY_FOR_ARCHITECTURE
+STATUS: READY_FOR_DESIGN
 
 
 # Language Policy

@@ -39,16 +39,28 @@ Feature Agent
 Specification
     │
     ▼
+Design Agent
+    │
+    ▼
+Design
+    │
+    ▼
 Architecture Agent
     │
     ▼
 Architecture
     │
     ▼
-Implementation Agent
+Backend Implementation Agent
     │
     ▼
-Code
+Backend Code
+    │
+    ▼
+Frontend Implementation Agent
+    │
+    ▼
+Frontend Code
     │
     ▼
 Review Agent
@@ -76,6 +88,27 @@ specification.md
 
 ⸻
 
+Design Agent
+
+Responsible for:
+
+* User journey and user flow
+* Screen list and navigation
+* Component hierarchy
+* Forms and validation rules
+* Loading, empty, error and success states
+* Responsive behavior
+* Accessibility
+* Design tokens
+
+Never makes backend, database, or API design decisions.
+
+Output:
+
+design.md
+
+⸻
+
 Architecture Agent
 
 Responsible for:
@@ -87,25 +120,50 @@ Responsible for:
 * Performance
 * Technical architecture
 
+Never makes UI or UX decisions — those belong to the Design Agent.
+
 Output:
 
 architecture.md
 
 ⸻
 
-Implementation Agent
+Backend Implementation Agent
 
 Responsible for:
 
-* Implementing approved architecture
-* Writing production-ready code
-* Generating tests
-* Producing implementation reports
+* Implementing the approved architecture on the server side
+* Writing production-ready backend code
+* Exposing API contracts required by the Frontend Agent
+* Generating backend tests
+* Producing a backend implementation report
+
+Never implements UI.
 
 Output:
 
-Source Code
-implementation-report.md
+Backend Source Code
+backend-implementation-report.md
+
+⸻
+
+Frontend Implementation Agent
+
+Responsible for:
+
+* Implementing UI, pages, components and forms
+* Implementing client-side validation
+* Connecting to the APIs exposed by the Backend Agent
+* Following design.md exactly
+* Generating frontend tests
+* Producing a frontend implementation report
+
+Never redesigns UX. Never implements backend logic.
+
+Output:
+
+Frontend Source Code
+frontend-implementation-report.md
 
 ⸻
 
@@ -113,8 +171,9 @@ Review Agent
 
 Responsible for:
 
-* Code review
+* Independent review of Specification, Design, Architecture, Backend and Frontend
 * Security review
+* Accessibility review
 * Architecture compliance
 * Acceptance criteria verification
 * Final recommendation
@@ -159,6 +218,9 @@ Examples:
 * Security
 * Architecture
 * Git
+* Design
+* Accessibility
+* Frontend
 
 ⸻
 
@@ -169,8 +231,9 @@ Every artifact is generated from a template.
 Current templates include:
 
 * Specification
+* Design
 * Architecture
-* Implementation Report
+* Implementation Report (shared by Backend and Frontend)
 * Review Report
 
 ⸻
@@ -184,6 +247,7 @@ All generated project artifacts must be written in English.
 This includes:
 
 * Specifications
+* Design documents
 * Architecture documents
 * Code comments
 * API documentation
@@ -198,6 +262,7 @@ Principles
 * One artifact per stage.
 * Human review before progressing.
 * Business decisions never leak into implementation.
+* UX/UI decisions never leak into backend architecture.
 * Architecture decisions never leak into product discovery.
 * Deterministic outputs whenever possible.
 * Reuse existing project context instead of repeating prompts.
@@ -210,9 +275,13 @@ Idea
 ↓
 Feature Specification
 ↓
+Design
+↓
 Architecture Design
 ↓
-Implementation
+Backend Implementation
+↓
+Frontend Implementation
 ↓
 Review
 ↓

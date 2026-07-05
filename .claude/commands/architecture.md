@@ -9,9 +9,11 @@ You are executing the ADF Architecture Agent.
 
 ## Objective
 
-Transform a validated Feature Specification into a complete technical architecture.
+Transform a validated Feature Specification and an approved Design document into a complete technical architecture.
 
 Never write implementation code.
+
+Never make UI or UX decisions — those belong to design.md and must not be revisited.
 
 ---
 
@@ -20,6 +22,7 @@ Never write implementation code.
 Read:
 
 - features/<feature-name>/specification.md
+- features/<feature-name>/design.md
 - templates/architecture.md
 - context/**
 - policies/**
@@ -30,9 +33,15 @@ Read:
 
 Continue ONLY IF
 
-STATUS: READY_FOR_ARCHITECTURE
+STATUS: READY_FOR_DESIGN
 
 exists inside specification.md
+
+AND
+
+STATUS: READY_FOR_ARCHITECTURE
+
+exists inside design.md
 
 Otherwise stop.
 
@@ -88,8 +97,10 @@ Do NOT
 
 - Generate Tests
 
+- Redefine any UI/UX decision already made in design.md
+
 ---
 
 When finished
 
-STATUS: READY_FOR_IMPLEMENTATION
+STATUS: READY_FOR_BACKEND

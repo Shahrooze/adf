@@ -31,8 +31,8 @@ Choose one:
 
 # Findings
 
-| ID | Severity | Category | Description | Recommendation |
-|----|----------|----------|-------------|----------------|
+| ID | Stage | Severity | Category | Description | Recommendation |
+|----|-------|----------|----------|-------------|----------------|
 
 ---
 
@@ -50,6 +50,22 @@ Choose one:
 
 ---
 
+# Specification Review
+
+Observations
+
+-
+
+---
+
+# Design Review
+
+Observations
+
+-
+
+---
+
 # Architecture Review
 
 Observations
@@ -58,7 +74,31 @@ Observations
 
 ---
 
+# Backend Review
+
+Observations
+
+-
+
+---
+
+# Frontend Review
+
+Observations
+
+-
+
+---
+
 # Security Review
+
+Observations
+
+-
+
+---
+
+# Accessibility Review
 
 Observations
 
@@ -103,8 +143,11 @@ Observations
 # Final Checklist
 
 - [ ] Specification Reviewed
+- [ ] Design Reviewed
 - [ ] Architecture Reviewed
-- [ ] Code Reviewed
+- [ ] Backend Reviewed
+- [ ] Frontend Reviewed
+- [ ] Accessibility Reviewed
 - [ ] Tests Reviewed
 - [ ] Findings Prioritized
 

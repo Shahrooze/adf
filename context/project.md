@@ -4,7 +4,7 @@
 
 Name: ADF (AI Development Framework)
 
-Version: 0.1.0
+Version: 0.2.0
 
 ---
 
@@ -38,11 +38,15 @@ ADF should support multiple LLM providers without changing agent logic.
 
 4. Business decisions belong to Product.
 
-5. Technical decisions belong to Architecture.
+5. UX and UI decisions belong to Design.
 
-6. Implementation follows Architecture.
+6. Technical decisions belong to Architecture.
 
-7. Review never changes implementation.
+7. Backend Implementation follows Architecture; Frontend Implementation follows Design.
+
+8. Implementation never changes Design or Architecture decisions.
+
+9. Review never changes implementation, design, or architecture.
 
 ---
 
@@ -52,11 +56,19 @@ Feature
 
 ↓
 
+Design
+
+↓
+
 Architecture
 
 ↓
 
-Implementation
+Backend Implementation
+
+↓
+
+Frontend Implementation
 
 ↓
 
@@ -154,8 +166,10 @@ Always generate production-ready output.
 A feature is complete only when
 
 - Specification approved
+- Design approved
 - Architecture approved
-- Implementation completed
+- Backend Implementation completed
+- Frontend Implementation completed
 - Review approved
 - Tests available
 - Documentation updated

@@ -232,13 +232,13 @@ List unresolved questions.
 
 If this section is not empty,
 
-the feature is NOT ready for Architecture.
+the feature is NOT ready for Design.
 
 ⸻
 
 Definition of Ready
 
-Before this feature moves to Architecture all conditions below MUST be true.
+Before this feature moves to Design all conditions below MUST be true.
 
 * Business Goal completed
 * Personas identified
@@ -261,4 +261,4 @@ Approved At:
 
 ⸻
 
-STATUS: READY_FOR_ARCHITECTURE
+STATUS: READY_FOR_DESIGN

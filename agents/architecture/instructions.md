@@ -5,6 +5,7 @@
 Read
 
 - specification.md
+- design.md
 - context/**
 - policies/**
 
@@ -15,6 +16,10 @@ Read
 Validate
 
 Specification must contain
+
+STATUS: READY_FOR_DESIGN
+
+Design must contain
 
 STATUS: READY_FOR_ARCHITECTURE
 
@@ -40,6 +45,9 @@ Design
 - Domain
 - Infrastructure
 
+Derive API endpoints and payloads from the screens, forms and states defined
+in design.md. Do not revisit or change the UI/UX decisions themselves.
+
 ---
 
 ## Step 5
@@ -51,6 +59,8 @@ Every Functional Requirement
 Every Business Rule
 
 Every Acceptance Criterion
+
+Every Screen in design.md that requires server data
 
 must be traceable inside architecture.
 
@@ -76,4 +86,4 @@ Architecture completeness.
 
 Finish with
 
-STATUS: READY_FOR_IMPLEMENTATION
+STATUS: READY_FOR_BACKEND

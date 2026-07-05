@@ -2,11 +2,15 @@
 
 > Status: Draft
 
+> Used by both the Backend Agent (backend-implementation-report.md) and the
+> Frontend Agent (frontend-implementation-report.md). Set Layer accordingly.
+
 ---
 
 # Metadata
 
 - Feature:
+- Layer: (Backend / Frontend)
 - Version:
 - Author:
 - Date:
@@ -109,4 +113,8 @@ Important implementation decisions.
 
 ---
 
-STATUS: READY_FOR_REVIEW
+STATUS: READY_FOR_FRONTEND
+
+> Backend Layer finishes with STATUS: READY_FOR_FRONTEND.
+> Frontend Layer finishes with STATUS: READY_FOR_REVIEW.
+> Use exactly one status line in the generated document — the one matching this report's Layer.

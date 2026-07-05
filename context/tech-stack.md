@@ -76,6 +76,27 @@ Background Jobs
 
 ---
 
+# Design
+
+Design Tokens map onto
+
+- Tailwind CSS theme configuration
+- shadcn/ui component primitives
+
+Design Tokens cover
+
+- Color roles
+- Typography scale
+- Spacing scale
+- Radius scale
+- Elevation / shadow scale
+
+The Design Agent must express tokens in terms that translate directly into
+this configuration. The Frontend Agent must not introduce values outside the
+token scale.
+
+---
+
 # Frontend
 
 Framework
