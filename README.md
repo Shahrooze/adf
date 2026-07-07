@@ -262,6 +262,24 @@ Output: code-review-report.md
 
 ⸻
 
+Debug Agent
+
+A utility agent, used any time after Backend/Frontend Implementation to resolve a reported bug — not part of the linear feature pipeline above.
+
+Responsible for:
+
+* Reproducing the reported bug
+* Root-causing it
+* Classifying it as Simple or Complex
+* Simple: fixing it, adding a regression test, and updating any documentation left stale by the fix, in the same pass
+* Complex (unclear root cause, API/schema/security impact, or cross-feature blast radius): stopping after a Root Cause Flow Analysis and waiting for human approval before writing any fix
+
+Never modifies specification.md, design.md or architecture.md.
+
+Output: Source Code Fix (Simple path only), debug-report.md
+
+⸻
+
 Quality Gates
 
 Every stage is guarded by a Quality Gate: the next stage cannot start until the required artifact exists and reaches its passing status. See policies/quality-gates.md for Pass Criteria, Fail Criteria, Required Artifacts and Blocking Conditions for every gate, and workflows/feature-development.yaml for the machine-readable definitions.
@@ -330,6 +348,7 @@ Current templates include:
 * Security Review
 * Operations Readiness Report
 * Code Review Report
+* Debug Report
 
 ⸻
 
