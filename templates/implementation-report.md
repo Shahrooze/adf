@@ -21,6 +21,9 @@
 
 Brief summary of the implementation.
 
+Do not restate architecture.md or design.md content. Reference sections/IDs
+instead of repeating them.
+
 ---
 
 # Scope

@@ -15,7 +15,10 @@
 
 # Overview
 
-Describe the overall solution.
+Describe the overall technical solution only.
+
+Do not restate specification.md's Summary, Business Goal, Personas or User
+Stories. Reference them by ID where needed (e.g. "implements FR-001, FR-002").
 
 ---
 

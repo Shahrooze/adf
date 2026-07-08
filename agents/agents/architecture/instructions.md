@@ -76,6 +76,10 @@ using
 
 templates/architecture.md
 
+Do not copy or re-summarize specification.md's Summary, Business Goal,
+Personas or User Stories, nor design.md's Summary or User Journey. Reference
+them by ID (e.g. FR-001, US-1, SCR-002) instead of restating their content.
+
 ---
 
 ## Step 7

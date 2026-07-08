@@ -19,6 +19,9 @@ Summary
 
 Provide a short description of the experience being designed.
 
+Do not restate specification.md's Business Goal, Personas or User Stories in
+full. Reference them by ID (e.g. "covers US-1, FR-003").
+
 ⸻
 
 User Journey

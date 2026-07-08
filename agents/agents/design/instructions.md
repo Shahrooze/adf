@@ -147,6 +147,10 @@ using
 
 templates/design.md
 
+Do not copy or re-summarize specification.md's Business Goal, Personas or
+User Stories. Reference them by ID (e.g. FR-001, US-1) instead of restating
+their content.
+
 ---
 
 ## Step 15 - Final Validation

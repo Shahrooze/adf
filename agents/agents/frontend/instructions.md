@@ -112,6 +112,9 @@ Create `frontend-implementation-report.md` containing:
 - Known Limitations
 - Follow-up Tasks
 
+Do not restate architecture.md or design.md content in the Summary. Reference
+sections/IDs instead of repeating them.
+
 Finish with:
 
 `STATUS: READY_FOR_QA`
