@@ -6,8 +6,13 @@ Read
 
 - specification.md
 - design.md
-- context/**
-- policies/**
+- context/project.md
+- context/tech-stack.md
+- policies/architecture.md
+- policies/api-design.md
+- policies/quality-gates.md
+- policies/security.md
+- policies/observability.md
 
 ---
 

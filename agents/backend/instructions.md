@@ -33,8 +33,13 @@ Otherwise stop and explain why.
 
 Load:
 
-- context/**
-- policies/**
+- context/project.md
+- context/tech-stack.md
+- policies/coding.md
+- policies/security.md
+- policies/api-design.md
+- policies/testing.md
+- policies/quality-gates.md
 
 Pay particular attention to coding standards, security policies, and project architecture.
 

@@ -26,8 +26,11 @@ Otherwise stop and explain why.
 
 Load
 
-- context/**
-- policies/**
+- context/project.md
+- context/design-system.md
+- policies/design.md
+- policies/accessibility.md
+- policies/frontend.md
 - templates/design.md
 
 Pay particular attention to accessibility policy and existing design tokens.

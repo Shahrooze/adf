@@ -34,8 +34,12 @@ Otherwise stop and explain why.
 
 Load:
 
-- context/**
-- policies/**
+- context/tech-stack.md
+- context/design-system.md
+- policies/frontend.md
+- policies/accessibility.md
+- policies/coding.md
+- policies/testing.md
 
 Pay particular attention to the frontend and accessibility policies, and the project's frontend stack.
 

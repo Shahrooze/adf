@@ -31,7 +31,7 @@ Otherwise stop and explain why.
 
 Load
 
-- context/**
+- context/tech-stack.md
 - policies/security.md
 
 ---

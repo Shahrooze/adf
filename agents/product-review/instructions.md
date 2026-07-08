@@ -26,8 +26,8 @@ Otherwise stop and explain why.
 
 Load
 
-- context/**
-- policies/**
+- context/project.md
+- policies/quality-gates.md
 
 ---
 

@@ -30,7 +30,8 @@ Otherwise stop and explain why.
 
 Load
 
-- context/**
+- context/project.md
+- context/tech-stack.md
 - policies/architecture.md
 - policies/api-design.md
 

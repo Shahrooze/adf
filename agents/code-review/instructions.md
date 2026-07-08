@@ -38,7 +38,7 @@ Otherwise STOP.
 
 Read
 
-- context/**
+- context/tech-stack.md
 - policies/coding.md
 
 ---
