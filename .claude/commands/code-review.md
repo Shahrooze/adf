@@ -120,3 +120,18 @@ STATUS: RELEASE_READY
 
 only if the recommendation is APPROVED or APPROVED_WITH_COMMENTS. This is
 the last gate — once passed, the feature is Release Ready.
+
+---
+
+## Sync ADF Core
+
+Run
+
+node adf-core/cli.mjs sync <feature-name>
+
+This regenerates adf-core/registry.json, INDEX.md, CONTEXT.md, and
+DEPENDENCY-GRAPH.md, and validates the repository scoped to this feature.
+Must complete with no errors before this stage's gate can be considered
+satisfied. Because this is the terminal stage, this sync is also what
+confirms the whole feature's pipeline history is consistent (the
+Validation Engine's "incomplete-release" check specifically fires here).

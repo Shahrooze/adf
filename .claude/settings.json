@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node adf-core/cli.mjs *)",
+      "Bash(node --test adf-core*)"
+    ]
+  }
+}

@@ -150,3 +150,16 @@ STATUS: READY_FOR_BACKEND
 
 only if the recommendation is APPROVED or APPROVED_WITH_COMMENTS. Otherwise
 explain what the Architecture Agent must fix and stop.
+
+---
+
+## Step 13 - Sync ADF Core
+
+Run
+
+node adf-core/cli.mjs sync <feature-name>
+
+This regenerates adf-core/registry.json, INDEX.md, CONTEXT.md, and
+DEPENDENCY-GRAPH.md, and validates the repository scoped to this feature.
+Must complete with no errors before this stage's gate can be considered
+satisfied.

@@ -124,11 +124,24 @@ Verify
 
 ---
 
-# Step 10 — Generate Specification
+# Step 10 — Assign Feature ID
+
+Run
+
+node adf-core/cli.mjs next-id
+
+to get the next sequential FEAT-<NNN> (see policies/naming.md). Derive a
+kebab-case slug from the feature and combine them into the folder name
+
+features/FEAT-<NNN>-<slug>/
+
+---
+
+# Step 11 — Generate Specification
 
 Create
 
-features/<feature-name>/specification.md
+features/FEAT-<NNN>-<slug>/specification.md
 
 using
 
@@ -136,7 +149,7 @@ templates/specification.md
 
 ---
 
-# Step 11 — Final Validation
+# Step 12 — Final Validation
 
 Do not finish until
 
@@ -147,3 +160,18 @@ Do not finish until
 Finish with
 
 STATUS: READY_FOR_PRODUCT_REVIEW
+
+---
+
+# Step 13 — Register in ADF Core
+
+Run, in order:
+
+node adf-core/cli.mjs new FEAT-<NNN>-<slug> --priority <priority> --owner <owner>
+
+node adf-core/cli.mjs sync FEAT-<NNN>
+
+This creates features/FEAT-<NNN>-<slug>/feature.json (the Feature Registry
+entry — see adf-core/schema/feature.schema.md) and regenerates
+adf-core/registry.json, INDEX.md, CONTEXT.md, and DEPENDENCY-GRAPH.md. The
+sync command must complete with no errors before this stage is done.

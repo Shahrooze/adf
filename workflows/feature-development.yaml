@@ -2,7 +2,7 @@ id: feature-development
 
 name: Feature Development Workflow
 
-version: 3.0.0
+version: 3.1.0
 
 description: |
   Standard workflow for implementing a new feature using ADF.
@@ -10,6 +10,10 @@ description: |
   Implementation (Backend, Frontend) is strictly separated from quality
   validation (QA, Security Review, Operations Readiness Review, Code Review).
   See policies/quality-gates.md for the human-readable gate reference.
+  Every stage additionally ends by running `node adf-core/cli.mjs sync
+  <feature-name>` (must pass with zero errors) — see adf-core/README.md.
+  This is additive tooling, not a new stage: it does not change the stage
+  list, artifacts, or gate statuses below.
 
 trigger:
   type: feature

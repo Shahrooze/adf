@@ -25,6 +25,7 @@ Read the following files before doing anything:
 
 - agents/feature/agent.yaml
 - templates/specification.md
+- policies/naming.md
 
 If available also read:
 
@@ -32,7 +33,8 @@ If available also read:
 - docs/**
 
 No engineering policy in policies/** applies to pure product discovery —
-skip that directory for this stage.
+skip that directory for this stage. policies/naming.md is the one
+exception: always read it, it governs the folder name you create below.
 
 ---
 
@@ -66,11 +68,21 @@ Do not continue until all required information exists.
 
 ---
 
-Step 4
+Step 4 — Assign Feature ID
+
+Run `node adf-core/cli.mjs next-id` to get the next FEAT-<NNN> (see
+policies/naming.md), and derive a kebab-case slug from the feature.
+Combine them into the folder name
+
+features/FEAT-<NNN>-<slug>/
+
+---
+
+Step 5
 
 Generate
 
-features/<feature-name>/specification.md
+features/FEAT-<NNN>-<slug>/specification.md
 
 using
 
@@ -78,11 +90,26 @@ templates/specification.md
 
 ---
 
-Step 5
+Step 6
 
 Verify the generated specification satisfies every Quality Gate defined in
 
 agents/feature/agent.yaml
+
+---
+
+Step 7 — Register in ADF Core
+
+Run, in order:
+
+node adf-core/cli.mjs new FEAT-<NNN>-<slug> --priority <priority> --owner <owner>
+
+node adf-core/cli.mjs sync FEAT-<NNN>
+
+This creates features/FEAT-<NNN>-<slug>/feature.json (the Feature Registry
+entry — see adf-core/schema/feature.schema.md) and regenerates
+adf-core/registry.json, INDEX.md, CONTEXT.md, and DEPENDENCY-GRAPH.md. The
+sync command must complete with no errors before this stage is done.
 
 ---
 

@@ -4,7 +4,7 @@
 
 Name: ADF (AI Development Framework)
 
-Version: 0.3.0
+Version: 0.3.1
 
 ---
 
@@ -51,6 +51,8 @@ ADF should support multiple LLM providers without changing agent logic.
 10. No reviewing agent modifies the artifact it is reviewing.
 
 11. A stage's gate is satisfied only by the immediately preceding artifact's own `STATUS:` line — never assumed.
+
+12. Structured, cross-feature metadata (priority, owner, dependencies, current stage) lives in ADF Core (`adf-core/`), generated from the repository itself — never re-derived by hand and never duplicated into a second source.
 
 ---
 
@@ -147,6 +149,8 @@ Testing
 
 # Repository Structure
 
+adf-core/ — generated Feature Registry, Project Index, context digest, dependency graph, and Validation Engine (see adf-core/README.md)
+
 agents/
 
 templates/
@@ -157,9 +161,13 @@ policies/
 
 workflows/
 
-specs/
+features/ — per-feature artifacts and feature.json registry entries
+
+_archive/ — completed features moved out of active tracking
 
 .claude/
+
+.codex/
 
 ---
 
