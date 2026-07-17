@@ -115,3 +115,16 @@ sections/IDs instead of repeating them.
 Finish with:
 
 `STATUS: READY_FOR_FRONTEND`
+
+---
+
+## Step 9 - Sync ADF Core
+
+Run
+
+node adf-core/cli.mjs sync <feature-id>
+
+This regenerates adf-core/registry.json, INDEX.md, CONTEXT.md, and
+DEPENDENCY-GRAPH.md, and validates the repository scoped to this feature.
+Must complete with no errors before this stage's gate can be considered
+satisfied.

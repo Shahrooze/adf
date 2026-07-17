@@ -5,6 +5,116 @@ plan for that transition.
 
 ---
 
+# Migration Plan: ADF v3 → v3.1 (ADF Core)
+
+ADF v3.1 adds **ADF Core** (`adf-core/`) — a repository-based Feature
+Registry, Project Index, generated context digest, dependency graph, and
+Validation Engine. It is **additive, not breaking**: no stage, artifact,
+status vocabulary, or gate defined in v3 changed. Every existing
+`STATUS:`-line convention stays exactly as-is; ADF Core reads it, it
+doesn't replace it.
+
+---
+
+## 1. Summary of Changes
+
+| Area | v3 | v3.1 |
+|---|---|---|
+| Feature metadata | Implicit — re-derived by reading every artifact's prose | `features/<id>/feature.json` — structured, see `adf-core/schema/feature.schema.md` |
+| "What's the state of the repo" | Manual: open every feature's artifacts | `adf-core/INDEX.md` / `adf-core/registry.json` — generated, one lookup |
+| Cross-feature dependencies | Not tracked | `adf-core/DEPENDENCY-GRAPH.md`, from each `feature.json`'s `dependencies` |
+| Consistency checking | None | `node adf-core/cli.mjs validate` — Validation Engine (missing docs, duplicate IDs, broken references, circular dependencies, orphan files, incomplete releases, gate mismatches) |
+| Stage completion | Each stage's own `STATUS:` line only | Same, **plus** every stage now runs `node adf-core/cli.mjs sync <feature-name>` as its last action (mandatory — projects adopting ADF should record this in their own `AGENTS.md` → "Hard rules") |
+| New feature ID assignment | Manually count `features/` folders (`policies/naming.md`) | `node adf-core/cli.mjs next-id` (deterministic, same rule, no hand-counting) |
+
+No stage was added, removed, reordered, or renamed. No `STATUS:` value
+changed. `workflows/feature-development.yaml` bumped `3.0.0` → `3.1.0`
+(minor, per this repo's own convention of reserving a major bump for
+stage-list changes).
+
+---
+
+## 2. Why This Is Not a Breaking Change
+
+v1→v2 and v2→v3 changed the stage list and the status vocabulary every
+downstream agent gates on — that's what made them breaking. v3.1 changes
+neither. It adds a layer that *reads* the same artifacts and the same
+`STATUS:` lines every stage already produces, plus one new file per feature
+(`feature.json`) that no existing stage reads as an input or writes as an
+owned artifact. An agent that ignores ADF Core entirely can still complete
+every v3 gate exactly as before — it just won't get the sync/validation
+safety net, and the registry will silently go stale for that feature until
+someone runs `node adf-core/cli.mjs generate`.
+
+---
+
+## 3. Migrating In-Flight and Completed Features
+
+Every feature under `features/**` and `_archive/**` needs a `feature.json`.
+For a project adopting v3.1 with existing feature history:
+
+```sh
+node adf-core/cli.mjs backfill   # idempotent — skips features that already have feature.json
+node adf-core/cli.mjs generate
+```
+
+`backfill` infers `name` and `priority` from each feature's
+`specification.md` Metadata block, defaults `owner` to `Engineering`, and
+auto-declares any file that isn't one of the eleven standard pipeline
+artifacts as a `supplementary_document` (so pre-existing extras like a
+product-discovery brief aren't flagged as orphans). Review the generated
+`feature.json` files and correct `owner`/`priority`/`dependencies` by hand
+where the inferred defaults aren't right — this is the only manual step.
+
+For any **new** feature going forward, `node adf-core/cli.mjs new` (run by
+the Feature stage, see `agents/feature/instructions.md`) creates
+`feature.json` directly — no backfill needed.
+
+Running `node adf-core/cli.mjs validate` against a repository's existing
+history can surface inconsistencies that predate ADF Core — a feature's
+terminal status claiming a gate that an earlier stage's own artifact never
+actually satisfied, or a `STATUS:` value left over from a pre-v3 vocabulary
+that never got updated. These are real historical data issues the tool
+surfaces, not tooling bugs; treat them as a backlog item for whoever owns
+each affected feature, not as a blocker to adopting ADF Core.
+
+---
+
+## 4. External Tooling / Automation
+
+If anything outside a project's repo (scripts, CI, other agents) references
+stage prompts or artifacts, no change is required — every v3 file path,
+command name, and status string is unchanged. Anything that wants the new
+machine-readable feature state should read `adf-core/registry.json`.
+
+---
+
+## 5. Version Bumps
+
+- Framework version: `context/project.md` `0.3.0` → `0.3.1`.
+- `feature-development.yaml`: `3.0.0` → `3.1.0`.
+- No agent's own version changed — none of their inputs, outputs, or gate
+  logic changed. Only their `instructions.md` / slash-command files gained
+  a final "Sync ADF Core" step.
+
+---
+
+## 6. Rollback
+
+ADF Core is additive and self-contained under `adf-core/` plus one new file
+per feature directory (`feature.json`) plus the "Sync ADF Core" step
+appended to each stage's `instructions.md` / command file. To roll back:
+
+1. `git revert` the commit(s) that introduced `adf-core/` and the
+   "Sync ADF Core" steps.
+2. `feature.json` files can be deleted safely — nothing outside `adf-core/`
+   reads them.
+
+Rollback does not affect any `STATUS:` line or artifact — those are
+unchanged by this migration.
+
+---
+
 # Migration Plan: ADF v2 → v3
 
 ADF v3 decomposes the single monolithic Review stage into five independent

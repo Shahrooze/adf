@@ -288,14 +288,34 @@ Feature Gate → Product Gate → Design Gate → Architecture Gate → Backend 
 
 ⸻
 
+ADF Core
+
+ADF Core (adf-core/) is a zero-dependency Node CLI layered on top of the staged-gate workflow above. It turns "what's the state of this repo" from a manual read of every feature's artifacts into a single generated lookup.
+
+It maintains, per project that adopts ADF:
+
+* A Feature Registry (features/<id>/feature.json, aggregated into adf-core/registry.json)
+* A Project Index (adf-core/INDEX.md)
+* A generated context digest (adf-core/CONTEXT.md)
+* A dependency graph (adf-core/DEPENDENCY-GRAPH.md)
+* A Validation Engine (node adf-core/cli.mjs validate) that catches missing manifests, duplicate or broken Feature IDs, circular dependencies, orphan files, incomplete releases, and gate/status mismatches
+
+Every stage ends by running node adf-core/cli.mjs sync <feature-id>, which regenerates all of the above and validates the repository scoped to that feature — must pass with zero errors before the stage's gate is satisfied. This is additive tooling: it does not add, remove, or reorder any stage, and does not change any STATUS: vocabulary. See adf-core/README.md for the full command reference and adf-core/schema/feature.schema.md for the feature.json format.
+
+⸻
+
 Project Structure
 
 .claude/
+.codex/
+adf-core/
 agents/
 context/
 policies/
 templates/
 workflows/
+features/ — created per project as features are started
+_archive/ — created per project as features are archived
 
 ⸻
 
