@@ -2,9 +2,9 @@
 
 ## Project
 
-Name: ADF (AI Development Framework)
+Name: {{PROJECT_NAME}}
 
-Version: 0.3.1
+Version: {{PROJECT_VERSION}}
 
 ---
 
@@ -110,15 +110,15 @@ Release Ready
 
 Backend
 
-- .NET 10
+- {{BACKEND_FRAMEWORK}}
 
 Frontend
 
-- Next.js 16
+- {{FRONTEND_FRAMEWORK}}
 
 Database
 
-- PostgreSQL 17
+- {{DATABASE}}
 
 Architecture
 
@@ -130,11 +130,11 @@ Domain Design
 
 API
 
-- REST
+- {{API_STYLE}}
 
 Authentication
 
-- JWT
+- {{AUTH}}
 
 ORM
 
@@ -142,8 +142,8 @@ ORM
 
 Testing
 
-- xUnit
-- Playwright
+- {{TESTING_UNIT}}
+- {{TESTING_E2E}}
 
 ---
 

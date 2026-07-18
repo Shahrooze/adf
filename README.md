@@ -292,6 +292,8 @@ ADF Core
 
 ADF Core (adf-core/) is a zero-dependency Node CLI layered on top of the staged-gate workflow above. It turns "what's the state of this repo" from a manual read of every feature's artifacts into a single generated lookup.
 
+Adopting ADF in a new project starts with node adf-core/cli.mjs init: an interactive wizard (or --yes/--from/--set for scripted, non-interactive setup) that records the project's own technology stack in adf.config.json and renders context/tech-stack.md, context/project.md and context/design-system.md from it — instead of hand-editing those files' hardcoded defaults. See adf-core/README.md's Commands section for the full flag reference.
+
 It maintains, per project that adopts ADF:
 
 * A Feature Registry (features/<id>/feature.json, aggregated into adf-core/registry.json)
@@ -309,6 +311,7 @@ Project Structure
 .claude/
 .codex/
 adf-core/
+adf.config.json — this project's identity + technology stack, written by node adf-core/cli.mjs init
 agents/
 context/
 policies/
