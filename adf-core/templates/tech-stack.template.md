@@ -10,11 +10,11 @@ Agents MUST follow this document unless explicitly overridden.
 
 Framework
 
-- .NET 10
+- {{BACKEND_FRAMEWORK}}
 
 Language
 
-- C# 14
+- {{BACKEND_LANGUAGE}}
 
 Architecture
 
@@ -52,7 +52,7 @@ OpenAPI
 
 Database
 
-- PostgreSQL 17
+- {{DATABASE}}
 
 ORM
 
@@ -101,11 +101,11 @@ token scale.
 
 Framework
 
-- Next.js 16
+- {{FRONTEND_FRAMEWORK}}
 
 Language
 
-- TypeScript
+- {{FRONTEND_LANGUAGE}}
 
 UI
 
@@ -141,7 +141,7 @@ Data Fetching
 
 Preferred
 
-- JWT
+- {{AUTH}}
 
 Optional
 
@@ -177,7 +177,7 @@ against — see policies/observability.md.
 
 Unit Tests
 
-- xUnit
+- {{TESTING_UNIT}}
 
 Integration Tests
 
@@ -189,7 +189,7 @@ API Tests
 
 Frontend Tests
 
-- Playwright
+- {{TESTING_E2E}}
 
 ---
 
@@ -197,15 +197,15 @@ Frontend Tests
 
 Development
 
-- Docker
+- {{INFRA}}
 
 Production
 
-- Docker
+- {{INFRA}}
 
 Compose
 
-- Docker Compose
+- {{INFRA}} Compose
 
 ---
 
@@ -232,7 +232,7 @@ Frontend
 
 Branch Strategy
 
-- GitHub Flow
+- {{GIT_WORKFLOW}}
 
 Commit Convention
 

@@ -1,0 +1,31 @@
+{
+  "project": {
+    "name": "ADF (AI Development Framework)",
+    "version": "0.3.1",
+    "description": ""
+  },
+  "stack": {
+    "backend": {
+      "language": "C# 14",
+      "framework": ".NET 10"
+    },
+    "frontend": {
+      "framework": "Next.js 16",
+      "language": "TypeScript"
+    },
+    "database": "PostgreSQL 17",
+    "testing": {
+      "unit": "xUnit",
+      "e2e": "Playwright"
+    },
+    "auth": "JWT",
+    "api_style": "REST",
+    "git_workflow": "GitHub Flow",
+    "infra": "Docker"
+  },
+  "generated": {
+    "adf_version": "0.3.1",
+    "initialized_at": "2026-07-18",
+    "last_synced": "2026-07-18"
+  }
+}
