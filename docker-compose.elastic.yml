@@ -9,7 +9,7 @@ services:
       - xpack.security.enabled=true
       - xpack.security.http.ssl.enabled=false
       - xpack.security.transport.ssl.enabled=false
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD:-changeme}
+      - ELASTIC_PASSWORD=Test@Elastic123
       - ES_JAVA_OPTS=-Xms1g -Xmx1g
       - bootstrap.memory_lock=true
     ulimits:
@@ -22,7 +22,7 @@ services:
     volumes:
       - es_data:/usr/share/elasticsearch/data
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf -u elastic:${ELASTIC_PASSWORD:-changeme} http://localhost:9200/_cluster/health || exit 1"]
+      test: ["CMD-SHELL", "curl -sf -u elastic:Test@Elastic123 http://localhost:9200/_cluster/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -38,7 +38,7 @@ services:
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
       - ELASTICSEARCH_USERNAME=elastic
-      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD:-changeme}
+      - ELASTICSEARCH_PASSWORD=Test@Elastic123
     ports:
       - "5601:5601"
     networks:
