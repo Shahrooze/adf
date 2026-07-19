@@ -271,8 +271,8 @@ Responsible for:
 * Reproducing the reported bug
 * Root-causing it
 * Classifying it as Simple or Complex
-* Simple: fixing it, adding a regression test, and updating any documentation left stale by the fix, in the same pass
-* Complex (unclear root cause, API/schema/security impact, or cross-feature blast radius): stopping after a Root Cause Flow Analysis and waiting for human approval before writing any fix
+* Simple: updating every stale document to describe the correct/expected behavior first, then fixing the code to match it, then adding a regression test — documentation is the target the fix must satisfy, never written after the fact
+* Complex (unclear root cause, API/schema/security impact, or cross-feature blast radius): stopping after a Root Cause Flow Analysis and waiting for human approval before writing any fix or documentation change
 
 Never modifies specification.md, design.md or architecture.md.
 
