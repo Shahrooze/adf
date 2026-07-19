@@ -11,12 +11,14 @@ You are executing the ADF Debug Agent.
 
 Resolve the reported bug.
 
-- If it is Simple: fix it, add a regression test, and update every piece of
-  documentation that still describes the pre-fix behavior — in the same
-  pass.
-- If it is Complex: do NOT write a fix. Produce a Root Cause Flow Analysis
-  and stop, waiting for human approval of the proposed strategy before any
-  code is touched.
+- If it is Simple: FIRST update every piece of documentation that
+  describes the affected behavior to state the correct/expected
+  behavior, THEN change the code to match what was just documented, THEN
+  add a regression test. Documentation is the target the fix must
+  satisfy — never write the fix before the documentation it has to match.
+- If it is Complex: do NOT write a fix and do NOT change documentation.
+  Produce a Root Cause Flow Analysis and stop, waiting for human approval
+  of the proposed strategy before any code is touched.
 
 ---
 
@@ -85,15 +87,26 @@ When uncertain, classify Complex.
 
 ---
 
-## Step 5a - If Simple: Fix
+## Step 5a - If Simple: Update Documentation, Then Fix
 
-- Implement the smallest change that removes the root cause.
-- Add a regression test (fails before the fix, passes after).
-- Run the existing test suite for the affected area; it must still pass.
-- Update every document describing the pre-fix behavior (implementation
-  report, README, API docs, changelog, relevant inline docs). Do not touch
-  unrelated documentation.
-- Never refactor unrelated code.
+Work in this exact order. Do not reorder these sub-steps.
+
+1. **Update Documentation First.** Before touching any source code, update
+   every document that describes the affected behavior (implementation
+   report, README, API docs, changelog, relevant inline docs) to state the
+   CORRECT/expected behavior — the behavior the code is about to be
+   changed to have, not the buggy behavior it currently has. Do not touch
+   unrelated documentation. This is the target the fix must satisfy: if the
+   code does not end up matching what was just written, the fix is
+   incomplete.
+2. **Fix.** Implement the smallest change that removes the root cause and
+   makes the code match the documentation written in step 1.
+3. **Regression Test.** Add a regression test (fails before the fix,
+   passes after).
+4. **Verify.** Run the existing test suite for the affected area; it must
+   still pass.
+
+Never refactor unrelated code.
 
 ## Step 5b - If Complex: Flow Analysis Only
 
@@ -123,16 +136,19 @@ Never mark a bug Fixed without a regression test proving it.
 
 Never leave stale documentation describing the pre-fix behavior.
 
+Never write or change source code before the documentation it must match
+has been updated.
+
 ---
 
 ## Before Finishing
 
 Verify:
 
-- Complexity classified before any code was touched
-- (Simple) Root cause fixed, regression test passing, existing tests pass,
-  documentation updated
-- (Complex) No source code changed, Flow Analysis complete
+- Complexity classified before any code or documentation was touched
+- (Simple) Documentation updated to the correct behavior first, root cause
+  fixed to match it, regression test passing, existing tests pass
+- (Complex) No source code or documentation changed, Flow Analysis complete
 
 ---
 

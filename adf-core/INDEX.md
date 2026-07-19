@@ -69,6 +69,7 @@ _None._
 - `templates/architecture-review.md`
 - `templates/architecture.md`
 - `templates/code-review-report.md`
+- `templates/debug-report.md`
 - `templates/design.md`
 - `templates/implementation-report.md`
 - `templates/operations-readiness-report.md`
@@ -83,6 +84,7 @@ _None._
 - `agents/architecture-review/` — agent.yaml, instructions.md, system.md
 - `agents/backend/` — agent.yaml, instructions.md, system.md
 - `agents/code-review/` — agent.yaml, instructions.md, system.md
+- `agents/debug/` — agent.yaml, instructions.md, system.md
 - `agents/design/` — agent.yaml, instructions.md, system.md
 - `agents/feature/` — agent.yaml, instructions.md, system.md
 - `agents/frontend/` — agent.yaml, instructions.md, system.md
