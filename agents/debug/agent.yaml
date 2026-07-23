@@ -125,3 +125,16 @@ definition_of_done:
   - status == FIXED or NEEDS_FLOW_REVIEW
 
 next_agent: none
+
+# --- Harness registry metadata (additive; does not change prompt behavior) ---
+capabilities:
+  - debugging
+  - root-cause-analysis
+  - regression-testing
+tools:
+  - fs
+  - git
+  - terminal
+supported_artifacts:
+  - debug-report
+  - source-code

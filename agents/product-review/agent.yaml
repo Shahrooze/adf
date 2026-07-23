@@ -86,3 +86,12 @@ definition_of_done:
   - status == READY_FOR_DESIGN (if approved)
 
 next_agent: design-agent
+
+# --- Harness registry metadata (additive; does not change prompt behavior) ---
+capabilities:
+  - requirements-validation
+  - review
+tools:
+  - fs
+supported_artifacts:
+  - product-review

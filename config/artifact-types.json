@@ -1,0 +1,101 @@
+{
+  "artifactTypes": [
+    {
+      "id": "specification",
+      "name": "Feature Specification",
+      "template": "specification.md",
+      "producedBy": ["feature-agent"],
+      "consumedBy": ["product-review-agent", "design-agent", "architecture-agent"]
+    },
+    {
+      "id": "product-review",
+      "name": "Product Review",
+      "template": "product-review.md",
+      "producedBy": ["product-review-agent"],
+      "consumedBy": ["design-agent"]
+    },
+    {
+      "id": "design",
+      "name": "Design",
+      "template": "design.md",
+      "producedBy": ["design-agent"],
+      "consumedBy": ["architecture-agent", "frontend-agent"]
+    },
+    {
+      "id": "architecture",
+      "name": "Architecture",
+      "template": "architecture.md",
+      "producedBy": ["architecture-agent"],
+      "consumedBy": [
+        "architecture-review-agent",
+        "backend-agent",
+        "frontend-agent",
+        "security-review-agent",
+        "operations-readiness-agent"
+      ]
+    },
+    {
+      "id": "architecture-review",
+      "name": "Architecture Review",
+      "template": "architecture-review.md",
+      "producedBy": ["architecture-review-agent"],
+      "consumedBy": ["backend-agent"]
+    },
+    {
+      "id": "implementation-report",
+      "name": "Implementation Report",
+      "template": "implementation-report.md",
+      "producedBy": ["backend-agent", "frontend-agent"],
+      "consumedBy": ["qa-agent", "security-review-agent", "operations-readiness-agent", "code-review-agent"]
+    },
+    {
+      "id": "source-code",
+      "name": "Source Code",
+      "template": null,
+      "producedBy": ["backend-agent", "frontend-agent", "debug-agent"],
+      "consumedBy": ["code-review-agent"]
+    },
+    {
+      "id": "tests",
+      "name": "Tests",
+      "template": null,
+      "producedBy": ["backend-agent", "frontend-agent", "debug-agent"],
+      "consumedBy": ["qa-agent"]
+    },
+    {
+      "id": "qa-report",
+      "name": "QA Report",
+      "template": "qa-report.md",
+      "producedBy": ["qa-agent"],
+      "consumedBy": ["security-review-agent"]
+    },
+    {
+      "id": "security-review",
+      "name": "Security Review",
+      "template": "security-review.md",
+      "producedBy": ["security-review-agent"],
+      "consumedBy": ["operations-readiness-agent"]
+    },
+    {
+      "id": "operations-readiness-report",
+      "name": "Operations Readiness Report",
+      "template": "operations-readiness-report.md",
+      "producedBy": ["operations-readiness-agent"],
+      "consumedBy": ["code-review-agent"]
+    },
+    {
+      "id": "code-review-report",
+      "name": "Code Review Report",
+      "template": "code-review-report.md",
+      "producedBy": ["code-review-agent"],
+      "consumedBy": []
+    },
+    {
+      "id": "debug-report",
+      "name": "Debug Report",
+      "template": "debug-report.md",
+      "producedBy": ["debug-agent"],
+      "consumedBy": []
+    }
+  ]
+}

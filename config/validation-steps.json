@@ -1,0 +1,32 @@
+{
+  "steps": {
+    "lint": {
+      "command": null,
+      "description": "Static analysis / linting for the adopting project's own stack."
+    },
+    "unit-tests": {
+      "command": "node --test",
+      "description": "Fast, isolated unit tests. Defaults to the Harness's own `node --test` suite; override per project."
+    },
+    "integration-tests": {
+      "command": null,
+      "description": "Cross-component integration tests."
+    },
+    "security-scan": {
+      "command": null,
+      "description": "Static security analysis / dependency audit."
+    },
+    "performance": {
+      "command": null,
+      "description": "Performance / benchmark checks."
+    },
+    "build": {
+      "command": null,
+      "description": "Compile or build the project."
+    },
+    "review": {
+      "command": null,
+      "description": "Automated review step — typically wired to invoke the code-review agent via `adf agent run code-review-agent`."
+    }
+  }
+}

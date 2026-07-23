@@ -94,3 +94,12 @@ definition_of_done:
   - status == READY_FOR_BACKEND (if approved)
 
 next_agent: backend-agent
+
+# --- Harness registry metadata (additive; does not change prompt behavior) ---
+capabilities:
+  - architecture-validation
+  - review
+tools:
+  - fs
+supported_artifacts:
+  - architecture-review

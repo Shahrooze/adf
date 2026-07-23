@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Convenience wrapper: ./adf <command> [args...] == node bin/adf.mjs <command> [args...]
+exec node "$(dirname "${BASH_SOURCE[0]}")/bin/adf.mjs" "$@"

@@ -1,0 +1,127 @@
+id: parallel-development
+
+name: Parallel Development Workflow
+
+version: 1.0.0
+
+description: >
+  Demonstrates the Workflow Engine's parallel and conditional execution
+  support: Product discovery and Architecture run sequentially, Backend and
+  Frontend Implementation then run concurrently as a single parallel
+  stage, QA validates both, Code Review runs only if QA actually
+  completed, and Operations Readiness ("SRE") closes the loop with its own
+  retry policy. This is additive: it does not replace or modify
+  workflows/feature-development.yaml, the canonical sequential pipeline
+  described in policies/quality-gates.md.
+
+trigger:
+  type: feature
+
+stages:
+  - id: product
+    agent: feature-agent
+    produces:
+      - specification.md
+    gate:
+      name: Product Gate
+      required_artifacts:
+        - specification.md
+      status: READY_FOR_PRODUCT_REVIEW
+
+  - id: architecture
+    agent: architecture-agent
+    consumes:
+      - specification.md
+    produces:
+      - architecture.md
+    gate:
+      name: Architecture Gate
+      required_artifacts:
+        - architecture.md
+      status: READY_FOR_ARCHITECTURE_REVIEW
+
+  - id: implementation
+    parallel:
+      - id: backend-implementation
+        agent: backend-agent
+        consumes:
+          - architecture.md
+        produces:
+          - backend-implementation-report.md
+        gate:
+          name: Backend Gate
+          required_artifacts:
+            - backend-implementation-report.md
+          status: READY_FOR_FRONTEND
+        retry:
+          max_attempts: 2
+          backoff_ms: 1000
+        rollback:
+          tool: git
+          args:
+            action: status
+
+      - id: frontend-implementation
+        agent: frontend-agent
+        consumes:
+          - architecture.md
+        produces:
+          - frontend-implementation-report.md
+        gate:
+          name: Frontend Gate
+          required_artifacts:
+            - frontend-implementation-report.md
+          status: READY_FOR_QA
+        retry:
+          max_attempts: 2
+          backoff_ms: 1000
+
+  - id: qa
+    agent: qa-agent
+    consumes:
+      - backend-implementation-report.md
+      - frontend-implementation-report.md
+    produces:
+      - qa-report.md
+    gate:
+      name: QA Gate
+      required_artifacts:
+        - qa-report.md
+      status: READY_FOR_SECURITY_REVIEW
+
+  - id: code-review
+    agent: code-review-agent
+    condition:
+      type: stage-status
+      target: qa
+      equals: completed
+    consumes:
+      - qa-report.md
+    produces:
+      - code-review-report.md
+    gate:
+      name: Code Quality Gate
+      required_artifacts:
+        - code-review-report.md
+      status: RELEASE_READY
+
+  - id: sre
+    agent: operations-readiness-agent
+    consumes:
+      - code-review-report.md
+    produces:
+      - operations-readiness-report.md
+    gate:
+      name: Operations Gate
+      required_artifacts:
+        - operations-readiness-report.md
+      status: READY_FOR_CODE_REVIEW
+    retry:
+      max_attempts: 3
+      backoff_ms: 500
+      backoff_factor: 2
+
+rules:
+  - Backend Implementation and Frontend Implementation run concurrently once Architecture is approved.
+  - Code Review only runs if QA completed successfully (see the "code-review" stage's condition).
+  - A failed stage stops the workflow; artifacts already produced by sibling parallel branches are kept, not discarded.

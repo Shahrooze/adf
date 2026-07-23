@@ -1,0 +1,11 @@
+# Harness runtime state (logs, checkpoints, artifact snapshots, memory,
+# queue state) — regenerated on every run, never committed.
+.adf/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# OS / editor noise
+.DS_Store
+*.swp

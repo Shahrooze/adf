@@ -107,3 +107,12 @@ definition_of_done:
   - status == READY_FOR_CODE_REVIEW (if approved)
 
 next_agent: code-review-agent
+
+# --- Harness registry metadata (additive; does not change prompt behavior) ---
+capabilities:
+  - operations-readiness-analysis
+  - review
+tools:
+  - fs
+supported_artifacts:
+  - operations-readiness-report

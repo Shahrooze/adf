@@ -1,0 +1,7 @@
+{
+  "id": "hello-tool-plugin",
+  "name": "Hello Tool Plugin",
+  "version": "1.0.0",
+  "description": "Reference plugin: registers one new tool, one new validation step, and one new artifact type without touching Harness core.",
+  "main": "index.mjs"
+}

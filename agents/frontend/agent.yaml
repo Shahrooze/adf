@@ -101,3 +101,17 @@ definition_of_done:
   - status == READY_FOR_QA
 
 next_agent: qa-agent
+
+# --- Harness registry metadata (additive; does not change prompt behavior) ---
+capabilities:
+  - code-generation
+  - frontend-implementation
+  - testing
+tools:
+  - fs
+  - git
+  - terminal
+supported_artifacts:
+  - implementation-report
+  - source-code
+  - tests

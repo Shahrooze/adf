@@ -14,6 +14,21 @@ The goal is to make AI-generated software more maintainable, reviewable, and pro
 
 ⸻
 
+The Agent Runtime / Harness
+
+Everything below this point describes ADF's staged-gate *methodology* — which hasn't changed. What executes it has: ADF now ships a full Agent Runtime / Harness (runtime/) that turns the agents, workflows, and policies described in this document into something the machine actually runs, not just a set of prompts a human pastes into an AI CLI by hand.
+
+The Harness owns agent lifecycle, workflow orchestration (sequential, parallel, and conditional stages), tool execution, context assembly, memory, artifact tracking, a validation pipeline, retries with rollback, permission guardrails, structured logging, observability, and a plugin system — all driven by plain config files, zero npm dependencies. Agents stay exactly what they are on this page: a single-responsibility prompt with declared inputs and outputs. The Harness is what coordinates them.
+
+    ./adf run feature-development --feature-dir features/my-feature --report
+    ./adf run parallel-development --feature-dir features/my-feature   # Backend + Frontend in parallel
+    ./adf serve                                                        # REST API over the same runtime
+    ./adf --help
+
+See docs/ARCHITECTURE.md for the full component map, docs/WORKFLOWS.md for the declarative workflow format (including the parallel/conditional example above), docs/RUNTIME.md for the Agent Runtime's execution model, docs/CONFIGURATION.md for every config file, docs/PLUGINS.md for extending it without touching core, docs/DEVELOPER-GUIDE.md for the folder structure and contribution conventions, docs/EXAMPLES.md for more worked examples, and MIGRATION.md for what changed and why it's backward-compatible.
+
+⸻
+
 Philosophy
 
 ADF is built around one simple principle:
@@ -304,19 +319,27 @@ It maintains, per project that adopts ADF:
 
 Every stage ends by running node adf-core/cli.mjs sync <feature-id>, which regenerates all of the above and validates the repository scoped to that feature — must pass with zero errors before the stage's gate is satisfied. This is additive tooling: it does not add, remove, or reorder any stage, and does not change any STATUS: vocabulary. See adf-core/README.md for the full command reference and adf-core/schema/feature.schema.md for the feature.json format.
 
+Every adf-core command is also reachable through the unified Harness CLI as adf registry <command> (e.g. adf registry validate) — a passthrough, not a reimplementation; node adf-core/cli.mjs <command> keeps working exactly as it always has.
+
 ⸻
 
 Project Structure
 
 .claude/
 .codex/
-adf-core/
+adf-core/ — pre-Harness feature registry, project index, and validation CLI (unchanged, still fully supported)
 adf.config.json — this project's identity + technology stack, written by node adf-core/cli.mjs init
+runtime.config.json — Harness engine configuration (see docs/CONFIGURATION.md)
+adf, bin/adf.mjs — the unified CLI entrypoint
 agents/
 context/
 policies/
 templates/
-workflows/
+workflows/ — including workflows/parallel-development.yaml, the parallel/conditional example
+config/ — tools.json, guardrails.json, artifact-types.json, validation-steps.json, mcp-servers.json
+plugins/ — drop-in Harness plugins (see docs/PLUGINS.md)
+runtime/ — the Agent Runtime / Harness implementation and its own test suite (see docs/ARCHITECTURE.md)
+docs/ — Harness architecture, runtime, workflows, configuration, plugins, developer guide, examples
 features/ — created per project as features are started
 _archive/ — created per project as features are archived
 
@@ -440,17 +463,9 @@ Release Ready
 
 Current Status
 
-ADF is currently focused on:
+The Harness's cli-adapter executor (runtime/src/executors/cli-adapter-executor.mjs) already spawns whatever AI CLI is configured in runtime.config.json — Claude Code today, and Gemini CLI, OpenAI Codex, or any other CLI that accepts a prompt on stdin tomorrow, with no Harness code change, just a config change. The default mock executor requires no AI CLI at all, for tests and dry runs.
 
-* Claude Code
-
-Future support:
-
-* Gemini CLI
-* OpenAI Codex
-* Additional AI coding assistants
-
-The core framework is designed to remain vendor-independent.
+The core framework — both the methodology and the Harness — is designed to remain vendor-independent.
 
 ⸻
 
@@ -466,10 +481,10 @@ Goals
 
 Roadmap
 
-* Multiple AI runtime adapters
-* CLI (adf)
+* A bundled MCP client so the mcp tool can call real MCP servers directly, not just document how to wire one up
+* A direct-API executor (no AI CLI subprocess) alongside the existing mock and cli-adapter executors
+* IDE extension and GitHub Action clients for the same Harness the CLI and REST API already share
 * Project scaffolding
-* Automated framework validation
 * Agent examples and best practices
 
 ⸻

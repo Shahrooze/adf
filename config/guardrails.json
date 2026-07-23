@@ -1,0 +1,44 @@
+{
+  "defaultPolicy": "allow",
+  "toolPermissions": {
+    "fs": "allow",
+    "git": "allow",
+    "github": "ask",
+    "terminal": "ask",
+    "http": "ask",
+    "docker": "ask",
+    "database": "ask",
+    "mcp": "ask"
+  },
+  "agentOverrides": {
+    "qa-agent": { "fs": "allow", "terminal": "deny" },
+    "security-review-agent": { "fs": "allow", "terminal": "deny" },
+    "code-review-agent": { "fs": "allow", "terminal": "deny" },
+    "operations-readiness-agent": { "fs": "allow", "terminal": "deny" },
+    "product-review-agent": { "fs": "allow", "terminal": "deny", "git": "deny" },
+    "architecture-review-agent": { "fs": "allow", "terminal": "deny", "git": "deny" },
+    "debug-agent": { "terminal": "ask" },
+    "validation-pipeline": { "terminal": "allow" }
+  },
+  "dangerousCommandPatterns": [
+    "rm\\s+-rf\\s+/(?!\\S)",
+    "rm\\s+-rf\\s+~",
+    ":\\(\\)\\{\\s*:\\|:&\\s*\\};:",
+    "mkfs\\.",
+    "dd\\s+if=.*of=/dev/(sd|nvme|hd)",
+    "chmod\\s+-R\\s+777\\s+/",
+    "git\\s+push\\s+.*--force",
+    "git\\s+reset\\s+--hard",
+    ">\\s*/dev/sd[a-z]",
+    "curl[^|]*\\|\\s*sh",
+    "wget[^|]*\\|\\s*sh"
+  ],
+  "approvalHooks": {
+    "onAsk": "log",
+    "autoApproveInNonInteractive": false
+  },
+  "sandbox": {
+    "enabled": false,
+    "allowedWriteRoots": ["features", ".adf", "runtime/examples"]
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "tools": [
+    {
+      "id": "fs",
+      "name": "Filesystem",
+      "description": "Read, write, list and search files inside the repository working tree.",
+      "module": "fs-tool.mjs",
+      "permissions": ["fs:read", "fs:write"],
+      "timeoutMs": 15000,
+      "retries": 1
+    },
+    {
+      "id": "git",
+      "name": "Git",
+      "description": "Inspect and mutate local git state (status, diff, add, commit, branch).",
+      "module": "git-tool.mjs",
+      "permissions": ["fs:read", "fs:write", "exec"],
+      "timeoutMs": 30000,
+      "retries": 1
+    },
+    {
+      "id": "github",
+      "name": "GitHub",
+      "description": "Interact with GitHub (issues, pull requests) via the gh CLI when available.",
+      "module": "github-tool.mjs",
+      "permissions": ["network", "exec"],
+      "timeoutMs": 30000,
+      "retries": 2
+    },
+    {
+      "id": "terminal",
+      "name": "Terminal",
+      "description": "Execute an allow-listed shell command with a timeout.",
+      "module": "terminal-tool.mjs",
+      "permissions": ["exec"],
+      "timeoutMs": 60000,
+      "retries": 0
+    },
+    {
+      "id": "http",
+      "name": "HTTP",
+      "description": "Perform outbound HTTP requests.",
+      "module": "http-tool.mjs",
+      "permissions": ["network"],
+      "timeoutMs": 20000,
+      "retries": 2
+    },
+    {
+      "id": "docker",
+      "name": "Docker",
+      "description": "Run containerized commands (build, run, exec) via the docker CLI.",
+      "module": "docker-tool.mjs",
+      "permissions": ["exec", "network"],
+      "timeoutMs": 120000,
+      "retries": 0
+    },
+    {
+      "id": "database",
+      "name": "Database",
+      "description": "Run a parameterized query against a configured database connection string via CLI adapters (psql/mysql/sqlite3).",
+      "module": "database-tool.mjs",
+      "permissions": ["network", "exec"],
+      "timeoutMs": 30000,
+      "retries": 1
+    },
+    {
+      "id": "mcp",
+      "name": "MCP Server Bridge",
+      "description": "Invoke a tool exposed by a configured Model Context Protocol server. Servers are registered in config/mcp-servers.json (empty by default) — this tool becomes plug-and-play the moment one is added.",
+      "module": "mcp-tool.mjs",
+      "permissions": ["network", "exec"],
+      "timeoutMs": 30000,
+      "retries": 1
+    }
+  ]
+}

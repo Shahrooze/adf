@@ -99,3 +99,13 @@ definition_of_done:
   - status == RELEASE_READY (if approved)
 
 next_agent: none
+
+# --- Harness registry metadata (additive; does not change prompt behavior) ---
+capabilities:
+  - code-quality-review
+  - review
+tools:
+  - fs
+  - git
+supported_artifacts:
+  - code-review-report
