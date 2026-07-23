@@ -105,3 +105,17 @@ definition_of_done:
   - status == READY_FOR_FRONTEND
 
 next_agent: frontend-agent
+
+# --- Harness registry metadata (additive; does not change prompt behavior) ---
+capabilities:
+  - code-generation
+  - backend-implementation
+  - testing
+tools:
+  - fs
+  - git
+  - terminal
+supported_artifacts:
+  - implementation-report
+  - source-code
+  - tests

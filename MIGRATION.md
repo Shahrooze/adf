@@ -5,6 +5,96 @@ plan for that transition.
 
 ---
 
+# Migration Plan: ADF Core → ADF Agent Runtime / Harness (v4)
+
+ADF gains a full **Agent Runtime / Harness** (`runtime/`) — a lightweight
+operating system for the agents this repository already defined. It is
+**additive, not breaking**: the staged-gate methodology, every agent's
+prompt, every workflow stage, every `STATUS:` value, and adf-core itself
+are unchanged. What changed is that the methodology can now be *executed*
+by the Harness instead of only followed by a human copying prompts into an
+AI CLI by hand.
+
+## 1. Summary of Changes
+
+| Area | Before | Now |
+| --- | --- | --- |
+| Executing an agent | A human opens `agents/<id>/system.md` + `instructions.md` and pastes them into an AI CLI | `adf agent run <id>` — the Agent Runtime builds context, invokes a pluggable executor, tracks state (pending/running/paused/cancelled/timeout/completed/failed), records the produced artifact |
+| Executing a workflow | A human walks `workflows/feature-development.yaml` stage by stage | `adf run <workflow-id>` — the Workflow Engine executes it: sequential by default, `parallel:` stages fan out concurrently, `condition:` gates a stage, per-stage `retry:`/`rollback:`, checkpointed after every stage |
+| Agent metadata | `id`, `name`, `description`, `owner`, `stage`, `status`, `inputs`/`outputs`, `reads`/`writes`, `responsibilities`, `quality_gate`, ... | Same, **plus** an additive `capabilities`/`tools`/`supported_artifacts` block every `agents/*/agent.yaml` now ends with, so the Agent Registry has structured metadata without inference |
+| Tool access | Implicit — whatever the AI CLI's own tools allowed | Explicit, permissioned, logged: `fs`, `git`, `github`, `terminal`, `http`, `docker`, `database`, `mcp`, each gated by `config/guardrails.json` |
+| Artifact tracking | A file on disk plus its own `STATUS:` line | The same file, **plus** `id`, `type`, `version`, `author`, `dependencies`, `status`, and a full content-hash history via the Artifact Manager |
+| Recovering a failed stage | Manually re-run the agent by hand | `adf retry <run-id>` — resumes from the Workflow Engine's own checkpoint |
+| Consistency checking | `node adf-core/cli.mjs validate` | Unchanged — plus `adf validate` (a *different*, new command: the Validation Pipeline — lint/tests/security/build/review) and `adf doctor` (Harness environment health) |
+| Extending ADF | Add an agent directory / edit a workflow YAML by hand | Same, **plus** a plugin system (`plugins/*/plugin.json`) for adding tools, agents, workflows, artifact types, executors, or validation steps with zero core changes |
+| Clients | None — a human runs the AI CLI directly | CLI (`adf`), REST API (`adf serve`) — both reuse one `Harness` instance; an MCP server / IDE extension / GitHub Action would be a third thin wrapper around the same thing |
+
+No stage was added, removed, reordered, or renamed. No `STATUS:` value
+changed. `workflows/feature-development.yaml` itself is byte-for-byte
+unchanged (still `3.1.0`). `adf-core/cli.mjs` and every `adf-core/lib/*.mjs`
+module are untouched.
+
+## 2. Why This Is Not a Breaking Change
+
+Every file the pre-Harness workflow depended on still means exactly what
+it meant before. An agent's `system.md`/`instructions.md` still describes
+what that agent does and never mentions the Harness. A workflow's
+`STATUS:` convention is read by the Harness's gate evaluator via the exact
+same `adf-core/lib/fs-utils.mjs` function `adf-core validate` already used
+— one convention, not two. A project that ignores the Harness entirely and
+keeps pasting agent prompts into an AI CLI by hand loses nothing: every
+artifact it produces is exactly as valid as before, and `adf-core
+validate`/`sync` keep working unmodified. The Harness is purely additive
+tooling on top of files that already existed.
+
+The only files modified in-place were the twelve `agents/*/agent.yaml`
+manifests, and only by *appending* a new block after their existing
+content (`next_agent: ...` stayed the last pre-existing line; the new
+`capabilities`/`tools`/`supported_artifacts` keys follow it). Nothing was
+reordered, removed, or reinterpreted, and the YAML parser
+(`runtime/src/yaml/yaml-lite.mjs`) that reads these files back is tested
+against every one of them.
+
+## 3. Adopting the Harness
+
+Nothing is required to keep working exactly as before. To start using the
+Harness:
+
+```sh
+adf doctor                                    # confirm the environment is sane
+adf agent list                                 # see what the Agent Registry discovered
+adf workflow list
+adf run feature-development --feature-dir features/<existing-or-new-feature>
+```
+
+The default `mock` executor produces template-shaped placeholder content
+(never a real agent response) — safe to explore the Harness's mechanics
+with, but not a substitute for a real agent run. Point
+`runtime.config.json`'s `runtime.defaultExecutor` at `"cli-adapter"` (and
+configure `runtime.executors["cli-adapter"].command`) to have every agent
+execution actually invoke a real AI CLI — see `docs/RUNTIME.md` and
+`docs/EXAMPLES.md`.
+
+## 4. Migration Notes for Anyone Extending ADF
+
+- **Adding an agent?** Follow the existing `agents/*/agent.yaml` pattern
+  and append the same `capabilities`/`tools`/`supported_artifacts` block
+  so the Agent Registry has real metadata instead of falling back to
+  `tools: ["fs"]`, `capabilities: []` defaults. See
+  `docs/DEVELOPER-GUIDE.md`.
+- **Adding a workflow?** Plain YAML, no registration step — see
+  `docs/WORKFLOWS.md`. `workflows/parallel-development.yaml` is a
+  complete worked example of the parallel/conditional/retry/rollback
+  vocabulary.
+- **Adding a tool, validation step, or artifact type?** Either a
+  `config/*.json` entry, or a plugin (`docs/PLUGINS.md`) if you don't want
+  to touch this repo's own config files at all.
+- **CI/scripts that call `node adf-core/cli.mjs <cmd>` directly?** Keep
+  doing that — nothing requires switching to `adf registry <cmd>`, it's
+  offered for convenience, not as a deprecation.
+
+---
+
 # Migration Plan: ADF v3 → v3.1 (ADF Core)
 
 ADF v3.1 adds **ADF Core** (`adf-core/`) — a repository-based Feature

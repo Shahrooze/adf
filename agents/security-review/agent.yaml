@@ -95,3 +95,12 @@ definition_of_done:
   - status == READY_FOR_OPERATIONS_REVIEW (if approved)
 
 next_agent: operations-readiness-agent
+
+# --- Harness registry metadata (additive; does not change prompt behavior) ---
+capabilities:
+  - security-analysis
+  - review
+tools:
+  - fs
+supported_artifacts:
+  - security-review

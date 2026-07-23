@@ -1,0 +1,53 @@
+{
+  "$schema": "./runtime/src/config/runtime.config.schema.md",
+  "runtime": {
+    "defaultExecutor": "mock",
+    "agentTimeoutMs": 600000,
+    "maxConcurrentAgents": 4,
+    "pauseCheckIntervalMs": 250,
+    "shortTermMaxEntries": 200,
+    "executors": {
+      "cli-adapter": {
+        "command": "claude",
+        "args": ["-p"]
+      }
+    }
+  },
+  "queue": {
+    "concurrency": 4,
+    "defaultPriority": 5
+  },
+  "retry": {
+    "maxAttempts": 3,
+    "backoffMs": 2000,
+    "backoffFactor": 2,
+    "maxBackoffMs": 60000
+  },
+  "logging": {
+    "level": "info"
+  },
+  "memory": {
+    "backend": "file",
+    "shortTermMaxEntries": 200
+  },
+  "validation": {
+    "pipeline": [
+      "lint",
+      "unit-tests",
+      "integration-tests",
+      "security-scan",
+      "performance",
+      "build",
+      "review"
+    ],
+    "continueOnFailure": false
+  },
+  "api": {
+    "port": 4870,
+    "host": "127.0.0.1"
+  },
+  "plugins": {
+    "autoload": true,
+    "directories": ["plugins"]
+  }
+}

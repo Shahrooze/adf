@@ -82,3 +82,11 @@ failure_conditions:
   - Contradictory business rules
 
 next_agent: product-review-agent
+# --- Harness registry metadata (additive; does not change prompt behavior) ---
+capabilities:
+  - requirements-analysis
+  - product-discovery
+tools:
+  - fs
+supported_artifacts:
+  - specification

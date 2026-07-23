@@ -95,3 +95,12 @@ definition_of_done:
   - status == READY_FOR_ARCHITECTURE_REVIEW
 
 next_agent: architecture-review-agent
+# --- Harness registry metadata (additive; does not change prompt behavior) ---
+capabilities:
+  - system-design
+  - api-design
+  - database-design
+tools:
+  - fs
+supported_artifacts:
+  - architecture

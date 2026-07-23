@@ -95,3 +95,14 @@ definition_of_done:
   - status == READY_FOR_SECURITY_REVIEW (if approved)
 
 next_agent: security-review-agent
+
+# --- Harness registry metadata (additive; does not change prompt behavior) ---
+capabilities:
+  - test-planning
+  - coverage-validation
+  - review
+tools:
+  - fs
+  - terminal
+supported_artifacts:
+  - qa-report

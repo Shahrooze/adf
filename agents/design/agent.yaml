@@ -114,3 +114,12 @@ definition_of_done:
   - status == READY_FOR_ARCHITECTURE
 
 next_agent: architecture-agent
+
+# --- Harness registry metadata (additive; does not change prompt behavior) ---
+capabilities:
+  - ux-design
+  - ui-design
+tools:
+  - fs
+supported_artifacts:
+  - design
