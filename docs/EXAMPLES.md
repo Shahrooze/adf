@@ -6,15 +6,25 @@ stands — none require any external service or API key (they use the
 
 ## Run the canonical sequential pipeline
 
+The trigger ("feature") stage needs to be told what to build. With no
+`--context description=...`, `task.description` is empty and the Feature
+Agent has nothing to write a specification about — the run will complete
+the stage with no error but then fail the gate right after with "missing
+required artifact" or a STATUS mismatch, which looks like a bug but is
+really just an empty task:
+
 ```sh
-./adf run feature-development --feature-dir features/my-feature --report
+./adf run feature-development --feature-dir features/my-feature \
+  --context description="Add a simple test feature: allow users to bookmark a challenge." \
+  --report
 ./adf status --report          # most recent run's full execution report
 ```
 
 ## Run the parallel/conditional example
 
 ```sh
-./adf run parallel-development --feature-dir features/my-feature
+./adf run parallel-development --feature-dir features/my-feature \
+  --context description="Add a simple test feature: allow users to bookmark a challenge."
 ./adf workflow show parallel-development   # see the stage graph
 ```
 
