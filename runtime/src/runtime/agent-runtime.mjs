@@ -133,6 +133,8 @@ export class AgentRuntime {
         contextBundle,
         toolRuntime: this.toolRuntime,
         agentId,
+        featureDir,
+        produces: task.produces ?? agent.outputs ?? [],
         signal: controller.signal,
         executionId,
         logger: this.logger,
