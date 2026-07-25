@@ -123,9 +123,46 @@ export class ContextManager {
       const record = this.artifactManager.get(consume);
       return { id: record.id, type: record.type, content: this.artifactManager.readContent(record.id) ?? "" };
     }
+
+    // "context/**" and "policies/**" (the values every agent.yaml's own
+    // `reads:` list actually uses) are already included wholesale in every
+    // bundle's Project Context / Policies sections above -- resolving them
+    // again here would just duplicate that content into a phantom
+    // "Consumed Artifacts" entry, so treat them as already satisfied
+    // instead of warning about an unresolvable glob.
+    if (consume === "context/**" || consume === "policies/**") {
+      return null;
+    }
+
+    // Any other trailing "/**" means "everything under this directory" --
+    // concatenate every file in it into one synthetic artifact entry
+    // (e.g. an agent.yaml declaring `apps/api/**` as a read).
+    if (consume.endsWith("/**")) {
+      const dir = path.join(REPO_ROOT, consume.slice(0, -3));
+      const files = readDirText(dir, { extensions: [".md", ".json", ".yaml", ".yml"] });
+      if (files.length) {
+        return {
+          id: consume,
+          type: "directory",
+          content: files.map((f) => `## ${f.name}\n${f.content}`).join("\n\n"),
+        };
+      }
+      this.logger?.warn?.(`Context: could not resolve consumed artifact "${consume}"`, {});
+      return null;
+    }
+
+    // Try relative to featureDir first (the common case: an artifact
+    // another stage produced for this same feature), then relative to the
+    // repo root (e.g. `templates/specification.md`, `policies/naming.md`
+    // -- files that live outside any featureDir).
+    const candidates = [];
     if (featureDir) {
       const candidate = path.join(featureDir, consume);
-      const absCandidate = path.isAbsolute(candidate) ? candidate : path.join(REPO_ROOT, candidate);
+      candidates.push(path.isAbsolute(candidate) ? candidate : path.join(REPO_ROOT, candidate));
+    }
+    candidates.push(path.isAbsolute(consume) ? consume : path.join(REPO_ROOT, consume));
+
+    for (const absCandidate of candidates) {
       if (fs.existsSync(absCandidate)) {
         return {
           id: path.relative(REPO_ROOT, absCandidate).split(path.sep).join("/"),
@@ -134,6 +171,7 @@ export class ContextManager {
         };
       }
     }
+
     this.logger?.warn?.(`Context: could not resolve consumed artifact "${consume}"`, {});
     return null;
   }
