@@ -17,6 +17,40 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+// Observed in practice with the cli-adapter executor: a spawned AI CLI
+// writing a large artifact through its own Write/Edit tool has, at least
+// once, left the closing tags of its own tool-call syntax (e.g.
+// `</content>`, `</invoke>`) as the literal trailing bytes of the file it
+// wrote, instead of those being consumed as call structure. None of these
+// are ever legitimate artifact content, but they *are* enough to hide a
+// real terminal STATUS line one line above them from extractStatusLine
+// (adf-core/lib/fs-utils.mjs), which only reads the file's true last
+// non-blank line -- causing a gate to fail with STATUS "(none)" even
+// though the agent actually did produce a correctly-STATUS-lined
+// document. Strip a small, precise set of known tool-call-tag-only
+// trailing lines before this artifact is recorded, for every executor
+// (not just cli-adapter) since the check is cheap and can never match
+// real prose.
+const TOOL_CALL_LEAKAGE_LINE = /^<\/?(?:antml:)?(?:invoke|parameter|function_calls?|content)(?:\s[^>]*)?>$/i;
+
+function stripToolCallLeakage(absPath) {
+  if (!fs.existsSync(absPath)) return;
+  const original = fs.readFileSync(absPath, "utf8");
+  const lines = original.split(/\r?\n/);
+  let end = lines.length;
+  while (end > 0) {
+    const trimmed = lines[end - 1].trim();
+    if (trimmed === "" || TOOL_CALL_LEAKAGE_LINE.test(trimmed)) {
+      end--;
+      continue;
+    }
+    break;
+  }
+  if (end === lines.length) return;
+  const cleaned = lines.slice(0, end).join("\n") + "\n";
+  if (cleaned !== original) fs.writeFileSync(absPath, cleaned, "utf8");
+}
+
 export class AgentRuntime {
   constructor({
     agentRegistry,
@@ -226,6 +260,8 @@ export class AgentRuntime {
       } else if (!fs.existsSync(absPath)) {
         continue; // Not a document this executor produced content for, and nothing on disk to track.
       }
+
+      stripToolCallLeakage(absPath);
 
       const record = this.artifactManager.recordFromFile(absPath, {
         type: executorArtifact?.type ?? filename.replace(/\.md$/, ""),
