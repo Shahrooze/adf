@@ -251,10 +251,20 @@ export class WorkflowEngine {
     const retryPolicy = new RetryPolicy(stage.retry ?? this.config.retry ?? {});
     let retryCount = 0;
     let agentExecution = null;
+    let gateCheck = null;
     let lastError = null;
 
     try {
-      agentExecution = await retryPolicy.execute(
+      // The gate check lives *inside* the retried function, not after it.
+      // A real (non-mock) executor completing without error is no
+      // guarantee the agent actually produced a satisfying artifact --
+      // an AI CLI can "complete" a turn having only described what it
+      // would write, or having been blocked on an unrelated permission
+      // prompt it recovered from differently than last time. That's
+      // ordinary LLM-execution non-determinism, and a gate failure from it
+      // deserves the same retry/backoff treatment as an outright agent
+      // exception, not an immediate one-shot failure.
+      ({ agentExecution, gateCheck } = await retryPolicy.execute(
         async () => {
           const execution = await this.agentRuntime.run(stage.agent, {
             workflowRunId: run.id,
@@ -274,7 +284,11 @@ export class WorkflowEngine {
           if (execution.status !== "completed") {
             throw new Error(`Agent "${stage.agent}" ended with status "${execution.status}": ${execution.error ?? ""}`);
           }
-          return execution;
+          const check = evaluateGate(stage.gate, { featureDir: run.featureDir });
+          if (!check.passed) {
+            throw new Error(`gate failed: ${check.reasons.join("; ")}`);
+          }
+          return { agentExecution: execution, gateCheck: check };
         },
         {
           onRetry: (err, attempt) => {
@@ -285,31 +299,18 @@ export class WorkflowEngine {
             });
           },
         }
-      );
+      ));
     } catch (err) {
       lastError = err;
     }
 
-    if (!agentExecution) {
-      const rollbackOutcome = await this._runRollback(stage, run, lastError);
+    if (!agentExecution || !gateCheck?.passed) {
+      const rollbackOutcome = await this._runRollback(stage, run, lastError ?? new Error("gate failed"));
       return {
         stageId: stage.id,
         status: "failed",
         passed: false,
         error: lastError?.message ?? "unknown failure",
-        retryCount,
-        rollback: rollbackOutcome,
-      };
-    }
-
-    const gateCheck = evaluateGate(stage.gate, { featureDir: run.featureDir });
-    if (!gateCheck.passed) {
-      const rollbackOutcome = await this._runRollback(stage, run, new Error(gateCheck.reasons.join("; ")));
-      return {
-        stageId: stage.id,
-        status: "failed",
-        passed: false,
-        error: `gate failed: ${gateCheck.reasons.join("; ")}`,
         retryCount,
         rollback: rollbackOutcome,
       };
