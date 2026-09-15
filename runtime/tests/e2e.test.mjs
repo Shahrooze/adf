@@ -24,8 +24,18 @@ function cleanupFeatureDir(relDir) {
   fs.rmSync(path.join(REPO_ROOT, relDir), { recursive: true, force: true });
 }
 
+function cleanupFeatureDirsByPrefix(prefix) {
+  const featuresDir = path.join(REPO_ROOT, "features");
+  if (!fs.existsSync(featuresDir)) return;
+  for (const entry of fs.readdirSync(featuresDir, { withFileTypes: true })) {
+    if (entry.isDirectory() && entry.name.startsWith(prefix)) {
+      fs.rmSync(path.join(featuresDir, entry.name), { recursive: true, force: true });
+    }
+  }
+}
+
 test("e2e: run a parallel workflow through the real CLI binary and inspect it end to end", () => {
-  const featureDir = `features/__e2e_${Date.now()}__`;
+  const featureDir = `.adf/e2e/__e2e_${Date.now()}__`;
   const runId = `e2e-run-${Date.now()}`;
 
   const runResult = adf(["run", "parallel-development", "--feature-dir", featureDir, "--run-id", runId, "--report"]);
@@ -60,6 +70,21 @@ test("e2e: run a parallel workflow through the real CLI binary and inspect it en
   cleanupFeatureDir(featureDir);
 });
 
+test("e2e: run product-discovery through the real CLI binary", () => {
+  const featureDir = `.adf/e2e/__e2e_discovery_${Date.now()}__`;
+  const runId = `e2e-discovery-run-${Date.now()}`;
+
+  const runResult = adf(["run", "product-discovery", "--feature-dir", featureDir, "--run-id", runId, "--report"]);
+  assert.equal(runResult.code, 0, runResult.stdout + runResult.stderr);
+  assert.match(runResult.stdout, /finished with status: completed/);
+  assert.ok(fs.existsSync(path.join(REPO_ROOT, featureDir, "research-brief.md")));
+
+  const artifact = fs.readFileSync(path.join(REPO_ROOT, featureDir, "research-brief.md"), "utf8");
+  assert.match(artifact, /STATUS: READY_FOR_PRODUCT_INPUT/);
+
+  cleanupFeatureDir(featureDir);
+});
+
 test("e2e: adf validate skips (not fails) a step with no configured command", () => {
   // Workflow-run failure/retry/rollback end-to-end paths are already
   // covered at the module level in workflow-engine.test.mjs, driven
@@ -74,7 +99,7 @@ test("e2e: adf validate skips (not fails) a step with no configured command", ()
 });
 
 test("e2e: adf agent run produces a tracked artifact visible via adf artifacts show", () => {
-  const featureDir = `features/__e2e_agent_${Date.now()}__`;
+  const featureDir = `.adf/e2e/__e2e_agent_${Date.now()}__`;
   const runResult = adf(["agent", "run", "qa-agent", "--feature-dir", featureDir, "--produces", "qa-report.md"]);
   assert.equal(runResult.code, 0, runResult.stdout + runResult.stderr);
 
@@ -91,9 +116,11 @@ test("e2e: adf doctor, adf agent list, and adf workflow list all succeed against
   const agentList = adf(["agent", "list"]);
   assert.equal(agentList.code, 0);
   assert.match(agentList.stdout, /backend-agent/);
+  assert.match(agentList.stdout, /product-discovery-agent/);
   const workflowList = adf(["workflow", "list"]);
   assert.equal(workflowList.code, 0);
   assert.match(workflowList.stdout, /feature-development/);
+  assert.match(workflowList.stdout, /product-discovery/);
 });
 
 test("e2e: a workflow with an unsatisfiable gate fails through the CLI, and adf retry retries it", () => {
@@ -121,7 +148,7 @@ test("e2e: a workflow with an unsatisfiable gate fails through the CLI, and adf 
     ].join("\n")
   );
 
-  const featureDir = `features/__e2e_fail_${Date.now()}__`;
+  const featureDir = `.adf/e2e/__e2e_fail_${Date.now()}__`;
   const runId = `e2e-fail-run-${Date.now()}`;
 
   try {
@@ -140,10 +167,12 @@ test("e2e: a workflow with an unsatisfiable gate fails through the CLI, and adf 
   } finally {
     fs.rmSync(workflowPath, { force: true });
     cleanupFeatureDir(featureDir);
+    cleanupFeatureDirsByPrefix("__e2e_fail_");
   }
 });
 
 test("e2e: legacy adf-core commands keep working unmodified through adf registry", () => {
+  cleanupFeatureDirsByPrefix("__e2e_");
   const result = adf(["registry", "validate", "--json"]);
   assert.equal(result.code, 0);
   const parsed = JSON.parse(result.stdout);

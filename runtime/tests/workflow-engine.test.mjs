@@ -52,6 +52,14 @@ test("parseWorkflow normalizes feature-development.yaml into 12 sequential agent
   assert.ok(def.stages.every((s) => s.type === "agent" || s.type === "gate-only"));
 });
 
+test("parseWorkflow normalizes product-discovery.yaml as an optional pre-discovery workflow", () => {
+  const { workflowRegistry } = buildStack();
+  const def = parseWorkflow(workflowRegistry.get("product-discovery").raw);
+  assert.equal(def.stages.length, 1);
+  assert.equal(def.stages[0].agent, "product-discovery-agent");
+  assert.deepEqual(def.stages[0].produces, ["research-brief.md"]);
+});
+
 test("parseWorkflow normalizes parallel-development.yaml's parallel and conditional stages", () => {
   const { workflowRegistry } = buildStack();
   const def = parseWorkflow(workflowRegistry.get("parallel-development").raw);
@@ -73,6 +81,16 @@ test("WorkflowEngine runs the sequential feature-development workflow end to end
   assert.equal(Object.keys(result.stageResults).length, 12);
   assert.ok(fs.existsSync(path.join(REPO_ROOT, featureDir, "specification.md")));
   assert.ok(fs.existsSync(path.join(REPO_ROOT, featureDir, "code-review-report.md")));
+  fs.rmSync(path.join(REPO_ROOT, featureDir), { recursive: true, force: true });
+});
+
+test("WorkflowEngine runs the product-discovery workflow end to end", async () => {
+  const { engine, tmpRoot } = buildStack();
+  const featureDir = path.relative(REPO_ROOT, path.join(tmpRoot, "features", "discovery-demo"));
+  const result = await engine.run("product-discovery", { featureDir });
+  assert.equal(result.status, RUN_STATES.COMPLETED);
+  assert.equal(Object.keys(result.stageResults).length, 1);
+  assert.ok(fs.existsSync(path.join(REPO_ROOT, featureDir, "research-brief.md")));
   fs.rmSync(path.join(REPO_ROOT, featureDir), { recursive: true, force: true });
 });
 

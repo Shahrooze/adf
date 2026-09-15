@@ -5,11 +5,12 @@ import { loadToolRegistry, ToolRegistry, ToolDescriptor } from "../src/registry/
 import { loadWorkflowRegistry } from "../src/registry/workflow-registry.mjs";
 import { loadArtifactTypeRegistry } from "../src/registry/artifact-type-registry.mjs";
 
-test("AgentRegistry discovers all 12 agents with no errors", () => {
+test("AgentRegistry discovers all 13 agents with no errors", () => {
   const registry = loadAgentRegistry();
   assert.equal(registry.errors().length, 0);
   const ids = registry.list().map((a) => a.id).sort();
-  assert.equal(ids.length, 12);
+  assert.equal(ids.length, 13);
+  assert.ok(ids.includes("product-discovery-agent"));
   assert.ok(ids.includes("feature-agent"));
   assert.ok(ids.includes("backend-agent"));
   assert.ok(ids.includes("debug-agent"));
@@ -56,12 +57,17 @@ test("ToolRegistry.register allows plugins to add tools without touching config"
 test("WorkflowRegistry discovers feature-development.yaml", () => {
   const registry = loadWorkflowRegistry();
   assert.ok(registry.has("feature-development"));
+  assert.ok(registry.has("product-discovery"));
   const wf = registry.get("feature-development");
   assert.equal(wf.raw.stages.length, 12);
 });
 
 test("ArtifactTypeRegistry cross-references agents and templates", () => {
   const registry = loadArtifactTypeRegistry();
+  assert.ok(registry.has("research-brief"));
+  const researchBrief = registry.get("research-brief");
+  assert.ok(researchBrief.templateExists());
+  assert.deepEqual(researchBrief.producedBy, ["product-discovery-agent"]);
   assert.ok(registry.has("specification"));
   const spec = registry.get("specification");
   assert.ok(spec.templateExists());

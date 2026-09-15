@@ -3,13 +3,28 @@
 A workflow is a YAML file under `workflows/*.yaml`, parsed by
 `runtime/src/workflow/workflow-parser.mjs` into a normalized stage graph
 and executed by `runtime/src/workflow/workflow-engine.mjs`.
-`workflows/feature-development.yaml` (the canonical 12-stage pipeline —
-unchanged by this refactor) and `workflows/parallel-development.yaml` (a
-new example) are both real, working workflows you can run today:
+`workflows/product-discovery.yaml` (an optional pre-discovery research
+workflow), `workflows/feature-development.yaml` (the canonical 12-stage
+pipeline), and `workflows/parallel-development.yaml` (a parallel example)
+are real, working workflows you can run today:
 
 ```sh
+./adf run product-discovery --feature-dir features/my-feature
 ./adf run feature-development --feature-dir features/my-feature
 ./adf run parallel-development --feature-dir features/my-feature
+```
+
+## Optional Pre-Discovery
+
+Use `product-discovery` when the input is still a raw idea and needs market
+research, competitor benchmarking, UX pattern analysis, risk discovery, and
+MVP framing before the standard Feature Agent writes `specification.md`.
+
+```mermaid
+flowchart TD
+  idea["Raw Idea"] --> discovery["product-discovery-agent"]
+  discovery --> brief["research-brief.md"]
+  brief --> feature["feature-agent"]
 ```
 
 ## Stage Vocabulary

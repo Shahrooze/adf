@@ -8,6 +8,8 @@ ADF (AI Development Framework) is an opinionated framework for AI-assisted softw
 
 Instead of asking an LLM to generate an entire application in a single prompt, ADF breaks software development into well-defined engineering stages. Each stage has a single responsibility, a dedicated AI agent, explicit inputs, and predictable outputs.
 
+ADF also includes an optional Product Discovery Agent for raw ideas that need research before they enter the main development workflow. It can produce a benchmarked `research-brief.md` covering users, competitors, UX patterns, market gaps, risks, MVP scope, and handoff input for the Feature Agent.
+
 Implementation is strictly separated from quality validation: Backend and Frontend Implementation only build; QA, Security Review, Operations Readiness Review and Code Review each independently validate exactly one quality dimension.
 
 The goal is to make AI-generated software more maintainable, reviewable, and production-ready.
@@ -20,6 +22,7 @@ Everything below this point describes ADF's staged-gate *methodology* — which 
 
 The Harness owns agent lifecycle, workflow orchestration (sequential, parallel, and conditional stages), tool execution, context assembly, memory, artifact tracking, a validation pipeline, retries with rollback, permission guardrails, structured logging, observability, and a plugin system — all driven by plain config files, zero npm dependencies. Agents stay exactly what they are on this page: a single-responsibility prompt with declared inputs and outputs. The Harness is what coordinates them.
 
+    ./adf run product-discovery --feature-dir features/my-feature --report
     ./adf run feature-development --feature-dir features/my-feature --report
     ./adf run parallel-development --feature-dir features/my-feature   # Backend + Frontend in parallel
     ./adf serve                                                        # REST API over the same runtime
