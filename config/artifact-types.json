@@ -1,6 +1,13 @@
 {
   "artifactTypes": [
     {
+      "id": "research-brief",
+      "name": "Product Discovery Brief",
+      "template": "research-brief.md",
+      "producedBy": ["product-discovery-agent"],
+      "consumedBy": ["feature-agent", "product-review-agent"]
+    },
+    {
       "id": "specification",
       "name": "Feature Specification",
       "template": "specification.md",
