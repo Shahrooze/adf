@@ -1,0 +1,37 @@
+id: product-discovery
+
+name: Product Discovery Workflow
+
+version: 1.0.0
+
+description: |
+  Optional pre-discovery workflow for turning a raw product idea into a
+  benchmarked research brief before the standard Feature Agent creates a
+  feature specification.
+
+trigger:
+  type: raw-idea
+
+stages:
+  - id: product-discovery
+    agent: product-discovery-agent
+    produces:
+      - research-brief.md
+    gate:
+      name: Product Discovery Gate
+      required_artifacts:
+        - research-brief.md
+      status: READY_FOR_PRODUCT_INPUT
+      pass_criteria:
+        - Raw idea summary is clear
+        - Research scope is documented
+        - Competitor benchmark is present
+        - MVP recommendation is actionable
+        - Handoff to Feature Agent is complete
+      fail_criteria:
+        - Missing competitor benchmark
+        - Unsupported factual claims presented as facts
+        - Missing MVP recommendation
+        - Missing Feature Agent handoff
+      blocking_conditions:
+        - Any fail_criteria condition present
