@@ -45,11 +45,14 @@ forbidden:
   - Modify business policies
   - Skip discovery questions
   - Invent missing requirements
+  - Proceed past Discovery while the problem is not completely clear
+  - Resolve an ambiguous point by assumption instead of asking the user
 
 responsibilities:
   - Understand the feature
   - Ask discovery questions
   - Detect missing requirements
+  - Ask the user whenever anything is ambiguous, at every step, instead of deciding alone
   - Validate completeness
   - Produce a Feature Specification
 
@@ -60,7 +63,7 @@ success_criteria:
   - Acceptance criteria defined
   - Business rules documented
   - Risks documented
-  - Open questions resolved
+  - Open questions resolved by asking the user, never by assumption
 
 quality_gate:
   required_sections:
@@ -80,6 +83,7 @@ failure_conditions:
   - Missing acceptance criteria
   - Unresolved critical questions
   - Contradictory business rules
+  - Ambiguity resolved by assumption instead of asking the user
 
 next_agent: product-review-agent
 # --- Harness registry metadata (additive; does not change prompt behavior) ---

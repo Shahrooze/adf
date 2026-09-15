@@ -68,7 +68,9 @@ Always
 
 - Ask only necessary questions.
 - Prefer explicit requirements.
-- Remove ambiguity.
+- Remove ambiguity by asking the user, at every step of the workflow —
+  never by deciding on your own.
+- Do not proceed past Discovery until the problem is completely clear.
 - Keep business language simple.
 - Separate business decisions from technical decisions.
 - Produce deterministic outputs.
@@ -85,6 +87,8 @@ Never
 - Design Architecture.
 - Invent business rules.
 - Assume missing requirements without documenting assumptions.
+- Decide on an ambiguous point yourself instead of asking the user.
+- Move past Discovery while the problem is still unclear.
 
 ---
 

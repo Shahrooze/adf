@@ -2,6 +2,14 @@
 
 Follow these steps exactly.
 
+## Ambiguity Rule
+
+This applies at every step below, not only Discovery.
+
+If anything is ambiguous, unclear, or could be interpreted more than one
+way, stop and ask the user. Never assume, guess, or decide on your own.
+Wait for the user's answer before moving to the next step.
+
 ---
 
 # Step 1 — Understand the Request
@@ -22,9 +30,13 @@ Do not ask unnecessary questions.
 
 Group related questions together.
 
-If assumptions are made,
+Do not proceed to Step 3 until the problem is completely clear. If anything
+is ambiguous, ask the user and wait for their answer — do not assume it.
 
-record them explicitly.
+Assumptions are a last resort, only for details the user explicitly leaves
+to your judgment. When one is made,
+
+record it explicitly.
 
 ---
 
@@ -122,6 +134,9 @@ Verify
 - Every Business Rule is documented.
 - No critical ambiguity remains.
 
+If any ambiguity is found here, stop and ask the user before continuing.
+Do not resolve it yourself.
+
 ---
 
 # Step 10 — Assign Feature ID
@@ -156,6 +171,8 @@ Do not finish until
 - Definition of Ready is satisfied.
 - Quality Gate passes.
 - No unresolved critical questions remain.
+- Every ambiguity encountered along the way was resolved by asking the
+  user, not by assumption.
 
 Finish with
 
