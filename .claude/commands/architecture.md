@@ -3,119 +3,31 @@ description: Generate architecture for an approved feature.
 argument-hint: <feature-name>
 ---
 
-# Architecture Command
+<!-- GENERATED from agents/architecture/agent.yaml by `./adf commands` — do not edit. Change agents/architecture/ instead. -->
 
-You are executing the ADF Architecture Agent.
+# Architecture Agent
 
-## Objective
+You are executing the ADF Architecture Agent for: $ARGUMENTS
 
-Transform a validated Feature Specification and an approved Design document into a complete technical architecture.
+Read these two files in full and follow them exactly — they are the whole
+definition of this agent:
 
-Never write implementation code.
+1. agents/architecture/system.md — role, responsibilities and hard constraints
+2. agents/architecture/instructions.md — the step-by-step procedure, inputs, outputs and final STATUS
 
-Never make UI or UX decisions — those belong to design.md and must not be revisited.
+`<feature-name>` in those files is the feature named above; its artifacts
+live under `features/<feature-name>/`.
 
----
+## Write scope
 
-## Load Context
+When this agent runs under the ADF Harness, every file it changes is
+checked against agents/architecture/agent.yaml `permissions` (`@alias` entries are
+defined in config/guardrails.json `writeScope.pathAliases`).
 
-Read:
+May write:
 
-- features/<feature-name>/specification.md
-- features/<feature-name>/design.md
-- templates/architecture.md
-- context/**
-- policies/architecture.md
-- policies/api-design.md
+- features/<feature-name>/architecture.md
 
----
+Must never modify:
 
-## Validate
-
-Continue ONLY IF
-
-STATUS: READY_FOR_ARCHITECTURE
-
-exists inside design.md
-
-specification.md is read for requirements traceability only; its own gate
-(Product Review) has already passed by the time design.md reaches this
-status.
-
-Otherwise stop.
-
----
-
-## Produce
-
-Create
-
-features/<feature-name>/architecture.md
-
----
-
-The architecture must include
-
-# Overview
-
-# Domain Model
-
-# Entities
-
-# Value Objects
-
-# Aggregates
-
-# Application Services
-
-# Repositories
-
-# Database Changes
-
-# API Design
-
-# Events
-
-# Security
-
-# Performance
-
-# Risks
-
-# Implementation Plan
-
----
-
-Do NOT
-
-- Generate code
-
-- Generate SQL
-
-- Generate UI
-
-- Generate Tests
-
-- Redefine any UI/UX decision already made in design.md
-
----
-
-When finished
-
-STATUS: READY_FOR_ARCHITECTURE_REVIEW
-
-This hands off to the Architecture Review Agent (`/architecture-review`),
-not directly to Backend Implementation.
-
----
-
-## Sync ADF Core
-
-Run:
-
-node adf-core/cli.mjs sync <feature-name>
-
-This regenerates adf-core/registry.json, INDEX.md, CONTEXT.md, and
-DEPENDENCY-GRAPH.md, and validates the repository scoped to this feature.
-Must complete with no errors before this stage's gate can be considered
-satisfied.
+- @source-code

@@ -3,165 +3,38 @@ description: Reproduce, root-cause and fix a reported bug — or, if it is compl
 argument-hint: <bug-id-or-description> [feature-name]
 ---
 
-# Debug Command
+<!-- GENERATED from agents/debug/agent.yaml by `./adf commands` — do not edit. Change agents/debug/ instead. -->
 
-You are executing the ADF Debug Agent.
+# Debug Agent
 
-## Objective
+You are executing the ADF Debug Agent for: $ARGUMENTS
 
-Resolve the reported bug.
+Read these two files in full and follow them exactly — they are the whole
+definition of this agent:
 
-- If it is Simple: FIRST update every piece of documentation that
-  describes the affected behavior to state the correct/expected
-  behavior, THEN change the code to match what was just documented, THEN
-  add a regression test. Documentation is the target the fix must
-  satisfy — never write the fix before the documentation it has to match.
-- If it is Complex: do NOT write a fix and do NOT change documentation.
-  Produce a Root Cause Flow Analysis and stop, waiting for human approval
-  of the proposed strategy before any code is touched.
+1. agents/debug/system.md — role, responsibilities and hard constraints
+2. agents/debug/instructions.md — the step-by-step procedure, inputs, outputs and final STATUS
 
----
+`<feature-name>` in those files is the feature named above; its artifacts
+live under `features/<feature-name>/`.
 
-## Load Context
+## Write scope
 
-Read, if available:
+When this agent runs under the ADF Harness, every file it changes is
+checked against agents/debug/agent.yaml `permissions` (`@alias` entries are
+defined in config/guardrails.json `writeScope.pathAliases`).
 
-1. features/<feature-name>/specification.md
-2. features/<feature-name>/design.md
-3. features/<feature-name>/architecture.md
-4. features/<feature-name>/backend-implementation-report.md
-5. features/<feature-name>/frontend-implementation-report.md
-6. templates/debug-report.md
-7. context/**
-8. policies/coding.md
-9. policies/security.md
-10. policies/testing.md
-11. policies/git.md
+May write:
 
-These are read for intended behavior only. None of them are modified.
+- @source-code
+- README.md
+- docs/**
+- features/<feature-name>/*-implementation-report.md
+- features/<feature-name>/debug-reports/<bug-id>-debug-report.md
+- bugs/<bug-id>/debug-report.md
 
----
+Must never modify:
 
-## Step 1 - Capture the Bug Report
-
-Confirm: Description, Steps to Reproduce, Expected Behavior, Actual
-Behavior. If any of these is missing, ask before continuing.
-
----
-
-## Step 2 - Reproduce
-
-Reproduce against the current codebase. If it cannot be reproduced, STOP and
-report "Cannot Reproduce" — never mark it Fixed.
-
----
-
-## Step 3 - Root Cause
-
-Trace the defect to its actual source. Distinguish root cause from symptom.
-
----
-
-## Step 4 - Classify Complexity
-
-A bug is Simple only if ALL hold:
-
-- Root cause identified with high confidence, inside one component/layer
-- Fix does not change a public API contract or database schema
-- Fix does not touch authentication, authorization, payments or PII
-- Fix stays within a single feature/bounded context
-- No prior fix attempt for this exact bug already failed
-
-A bug is Complex if ANY hold:
-
-- Root cause still unclear
-- Fix requires an API contract or schema change
-- Concurrency/race-condition or data-integrity issue spanning multiple
-  transactions or services
-- Fix crosses the Backend/Frontend boundary non-trivially, or spans more
-  than one feature
-- Security-sensitive
-- A previous fix for this same bug already failed or regressed
-
-When uncertain, classify Complex.
-
----
-
-## Step 5a - If Simple: Update Documentation, Then Fix
-
-Work in this exact order. Do not reorder these sub-steps.
-
-1. **Update Documentation First.** Before touching any source code, update
-   every document that describes the affected behavior (implementation
-   report, README, API docs, changelog, relevant inline docs) to state the
-   CORRECT/expected behavior — the behavior the code is about to be
-   changed to have, not the buggy behavior it currently has. Do not touch
-   unrelated documentation. This is the target the fix must satisfy: if the
-   code does not end up matching what was just written, the fix is
-   incomplete.
-2. **Fix.** Implement the smallest change that removes the root cause and
-   makes the code match the documentation written in step 1.
-3. **Regression Test.** Add a regression test (fails before the fix,
-   passes after).
-4. **Verify.** Run the existing test suite for the affected area; it must
-   still pass.
-
-Never refactor unrelated code.
-
-## Step 5b - If Complex: Flow Analysis Only
-
-Do NOT write any fix. Produce instead:
-
-- Affected components/services/layers
-- Sequence of events leading to the defect
-- Root-cause hypotheses, ranked by confidence
-- Proposed fix strategies with trade-offs, blast radius and risks
-- A recommended strategy, clearly marked as a recommendation requiring human
-  approval
-
-No source code or documentation changes on this path.
-
----
-
-## Rules
-
-Never modify specification.md, design.md or architecture.md.
-
-Never invent new requirements or business rules.
-
-Never change a public API contract or database schema silently — that
-alone makes the bug Complex.
-
-Never mark a bug Fixed without a regression test proving it.
-
-Never leave stale documentation describing the pre-fix behavior.
-
-Never write or change source code before the documentation it must match
-has been updated.
-
----
-
-## Before Finishing
-
-Verify:
-
-- Complexity classified before any code or documentation was touched
-- (Simple) Documentation updated to the correct behavior first, root cause
-  fixed to match it, regression test passing, existing tests pass
-- (Complex) No source code or documentation changed, Flow Analysis complete
-
----
-
-Create
-
-features/<feature-name>/debug-reports/<bug-id>-debug-report.md
-
-(or bugs/<bug-id>/debug-report.md if not tied to a tracked feature)
-
-using
-
-templates/debug-report.md
-
-Finish with exactly one status line:
-
-`STATUS: FIXED` (Simple path) or `STATUS: NEEDS_FLOW_REVIEW` (Complex path)
+- specification.md
+- design.md
+- architecture.md
