@@ -7,6 +7,9 @@ workflows/feature-development.yaml is the machine-readable source of truth.
 
 A gate is enforced by checking the exact `STATUS:` line inside its Required
 Artifact — see each agent's `instructions.md` for the precise precondition.
+Under the Harness a gate additionally runs its `checks` (build, tests,
+lint), and a stage fails if it changed any file outside its agent's
+permissions — a STATUS line alone never passes a gate that lists checks.
 
 ---
 
@@ -118,4 +121,7 @@ by reading the immediately preceding artifact's `STATUS:` line, never by
 assuming success.
 
 A REJECTED or CHANGES_REQUIRED recommendation always stops the pipeline at
-that stage until the responsible agent resubmits.
+that stage until the responsible agent resubmits. A reviewer states it as
+the final line `STATUS: CHANGES_REQUIRED` or `STATUS: REJECTED`; the
+Harness then sends the findings back to the authoring stage for rework
+(at most `max_rounds` times, then a human decides).

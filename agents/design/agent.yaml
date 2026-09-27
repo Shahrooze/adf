@@ -50,7 +50,7 @@ permissions:
     - features/<feature-name>/design.md
 
   deny:
-    - source-code/**
+    - "@source-code"
     - specification.md
     - architecture.md
 
@@ -123,3 +123,16 @@ tools:
   - fs
 supported_artifacts:
   - design
+# Only these policies/*.md are put in this agent's context bundle (see
+# runtime/src/context/context-manager.mjs). Omit the key to receive all.
+policies:
+  - design
+  - accessibility
+  - frontend
+  - quality-gates
+# Slash command generated into .claude/commands/design.md and
+# .codex/prompts/design.md by `./adf commands` (never edit those by hand).
+command:
+  name: design
+  description: "Create the UI/UX design for an approved feature specification."
+  argument_hint: "<feature-name>"

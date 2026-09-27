@@ -81,12 +81,16 @@ test("ValidationPipeline continueOnFailure runs every step and reports the full 
   assert.equal(result.results[1].result, STEP_RESULTS.PASSED);
 });
 
-test("ValidationPipeline's default config/validation-steps.json wires unit-tests to the Harness's own suite", async () => {
+test("default config/validation-steps.json leaves project checks unconfigured and keeps the Harness suite as harness-tests", async () => {
   // Checked without actually executing it here (that would recursively
   // spawn the whole `node --test` suite from inside itself) — the real
   // execution path is already covered by the "runs a configured command"
   // test above against an isolated config file.
   const toolRuntime = buildToolRuntime();
   const pipeline = new ValidationPipeline({ toolRuntime, steps: ["unit-tests"] });
-  assert.equal(pipeline.stepsConfig["unit-tests"].command, "node --test");
+  // unit-tests is a workflow gate check: it must be the adopting project's
+  // own test command, never ADF's suite (a gate would otherwise "verify"
+  // the project by running the framework's tests).
+  assert.equal(pipeline.stepsConfig["unit-tests"].command, null);
+  assert.equal(pipeline.stepsConfig["harness-tests"].command, "node --test");
 });

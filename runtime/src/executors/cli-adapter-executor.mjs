@@ -18,7 +18,13 @@
 //      headless `-p` run has no terminal to answer an interactive
 //      permission prompt and fails closed (silently produces no file) —
 //      see _buildAllowedToolsArgs, scoped to what the agent's own
-//      agent.yaml `tools:` list declares, not a blanket bypass.
+//      agent.yaml `tools:` list declares AND config/guardrails.json allows
+//      for that agent (a "deny" is never granted; an "ask" goes through the
+//      approval hook once per run), not a blanket bypass.
+//   3. Its file writes can't be mediated call-by-call, so they are checked
+//      after the fact: the Workflow Engine diffs the working tree against
+//      the agent's agent.yaml permissions (guardrails/write-scope.mjs).
+//      The prompt states that scope up front (_buildScopeSection).
 //
 // Because this spawns a real OS process, pause()/resume()/cancel() are
 // genuine: SIGSTOP/SIGCONT actually suspend/continue the child on POSIX,
@@ -27,6 +33,7 @@ import { spawn } from "node:child_process";
 import path from "node:path";
 import { AgentExecutor } from "./agent-executor.mjs";
 import { REPO_ROOT } from "../config/paths.mjs";
+import { resolveWriteScope } from "../guardrails/write-scope.mjs";
 
 // Harness tool id (agents/*/agent.yaml `tools:`, config/tools.json) ->
 // Claude Code CLI `--allowedTools` entries. Kept deliberately conservative
@@ -54,6 +61,7 @@ export class CliAdapterExecutor extends AgentExecutor {
     cwd = process.cwd(),
     env = process.env,
     toolMap = DEFAULT_TOOL_MAP,
+    policyEngine = null,
   } = {}) {
     super();
     this.command = command;
@@ -61,6 +69,7 @@ export class CliAdapterExecutor extends AgentExecutor {
     this.cwd = cwd;
     this.env = env;
     this.toolMap = toolMap;
+    this.policyEngine = policyEngine;
     this._children = new Map();
   }
 
@@ -90,6 +99,26 @@ export class CliAdapterExecutor extends AgentExecutor {
     ].join("\n");
   }
 
+  // Tells the agent which paths it may change. The same scope is enforced
+  // after the run by the Workflow Engine's write-scope diff, so stating it
+  // here only saves the agent a failed attempt.
+  _buildScopeSection({ agent, featureDir }) {
+    const cfg = this.policyEngine?.guardrails?.writeScope;
+    if (!agent?.raw?.permissions?.write) return null;
+    let scope;
+    try {
+      scope = resolveWriteScope(agent, { featureDir, aliases: cfg?.pathAliases ?? {} });
+    } catch {
+      return null;
+    }
+    return [
+      `# Write Scope`,
+      `You may create or modify only files matching:`,
+      ...scope.write.map((w) => `- ${w.glob}`),
+      ...(scope.deny.length ? [`You must not modify (enforced after this run; violations fail the stage):`, ...scope.deny.map((d) => `- ${d.glob}`)] : []),
+    ].join("\n");
+  }
+
   _buildPrompt({ agent, task, contextBundle, featureDir, produces }) {
     const outputSection = this._buildOutputSection({ featureDir, produces });
     return [
@@ -100,6 +129,7 @@ export class CliAdapterExecutor extends AgentExecutor {
       `# Task`,
       task.description ?? "",
       outputSection,
+      this._buildScopeSection({ agent, featureDir }),
       `# Context`,
       contextBundle.toPromptText(),
     ]
@@ -108,12 +138,21 @@ export class CliAdapterExecutor extends AgentExecutor {
   }
 
   // Scoped `--allowedTools` for this specific agent's declared `tools:`,
-  // so a headless run can actually write its output without prompting for
-  // permission it has no terminal to answer — without falling back to an
-  // unscoped bypass for capabilities the agent never claimed to need.
-  _buildAllowedToolsArgs(agent) {
+  // filtered through the same guardrail policy the in-process Tool
+  // Runtime applies, so a headless run can actually write its output
+  // without prompting -- and without being granted something
+  // config/guardrails.json denies this agent.
+  async _buildAllowedToolsArgs(agent) {
     const names = new Set();
     for (const toolId of agent?.requiredTools ?? []) {
+      if (this.policyEngine) {
+        const policy = this.policyEngine.policyFor(agent.id, toolId);
+        if (policy === "deny") continue;
+        if (policy === "ask") {
+          const approved = await this.policyEngine.approvalHook.request({ agentId: agent.id, toolId, reason: "cli-adapter pre-authorization" });
+          if (!approved) continue;
+        }
+      }
       for (const name of this.toolMap[toolId] ?? []) names.add(name);
     }
     return names.size ? ["--allowedTools", [...names].join(" ")] : [];
@@ -123,7 +162,7 @@ export class CliAdapterExecutor extends AgentExecutor {
     yield { type: "progress", message: `spawning "${this.command}" for ${agent.id}` };
 
     const prompt = this._buildPrompt({ agent, task, contextBundle, featureDir, produces });
-    const args = [...this.args, ...this._buildAllowedToolsArgs(agent)];
+    const args = [...this.args, ...(await this._buildAllowedToolsArgs(agent))];
     const child = spawn(this.command, args, { cwd: this.cwd, env: this.env });
     this._children.set(executionId, child);
 

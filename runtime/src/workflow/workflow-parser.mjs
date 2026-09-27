@@ -42,13 +42,49 @@ function normalizeCondition(raw) {
   return { type: raw.type, target: raw.target, equals: raw.equals ?? "completed" };
 }
 
+// Statuses a reviewing agent writes when it legitimately does NOT approve.
+// A gate seeing one of these is a verdict, not a flaky execution: the
+// engine never retries it, it routes the findings back to the author
+// stage named in `on_fail.rework` instead.
+export const DEFAULT_REJECT_STATUSES = Object.freeze(["CHANGES_REQUIRED", "REJECTED"]);
+
+function asList(value) {
+  if (value == null) return [];
+  return Array.isArray(value) ? value : [value];
+}
+
+function normalizeGate(raw) {
+  if (!raw) return null;
+  return {
+    ...raw,
+    required_artifacts: asList(raw.required_artifacts),
+    // Validation-pipeline step ids (config/validation-steps.json) the
+    // Harness itself runs before the gate can pass -- the deterministic
+    // half of the gate, independent of what the agent claims.
+    checks: asList(raw.checks),
+    reject_statuses: raw.reject_statuses ? asList(raw.reject_statuses) : [...DEFAULT_REJECT_STATUSES],
+    // Exact lines that must appear in every required artifact.
+    markers: asList(raw.markers),
+  };
+}
+
+function normalizeOnFail(raw) {
+  if (!raw) return null;
+  if (typeof raw === "string") return { rework: raw, maxRounds: null };
+  if (!raw.rework) throw new Error(`Invalid on_fail (needs "rework: <stage-id>"): ${JSON.stringify(raw)}`);
+  return { rework: raw.rework, maxRounds: raw.max_rounds ?? raw.maxRounds ?? null };
+}
+
 function normalizeStage(raw, idPrefix = "") {
   const id = raw.id ?? `${idPrefix}stage-${Math.random().toString(36).slice(2, 8)}`;
   const common = {
     id,
     consumes: raw.consumes ?? [],
     produces: raw.produces ?? [],
-    gate: raw.gate ?? null,
+    gate: normalizeGate(raw.gate),
+    onFail: normalizeOnFail(raw.on_fail ?? raw.onFail),
+    // null = inherit the workflow-level `human_approval` setting.
+    humanApproval: raw.human_approval ?? raw.humanApproval ?? null,
     retry: normalizeRetry(raw.retry),
     rollback: normalizeRollback(raw.rollback),
     condition: normalizeCondition(raw.condition),
@@ -74,7 +110,7 @@ function normalizeStage(raw, idPrefix = "") {
 }
 
 export class WorkflowDefinition {
-  constructor({ id, name, version, description, trigger, stages, rules }) {
+  constructor({ id, name, version, description, trigger, stages, rules, humanApproval = false, track = null }) {
     this.id = id;
     this.name = name;
     this.version = version;
@@ -82,6 +118,19 @@ export class WorkflowDefinition {
     this.trigger = trigger;
     this.stages = stages;
     this.rules = rules;
+    this.humanApproval = humanApproval;
+    this.track = track;
+  }
+
+  indexOf(stageId) {
+    return this.stages.findIndex((s) => s.id === stageId);
+  }
+
+  // Gate-only stages are mechanical checks; only stages that produced work
+  // (agent or parallel) are offered to a human for approval.
+  requiresApproval(stage) {
+    if (stage.type === STAGE_TYPES.GATE_ONLY) return false;
+    return stage.humanApproval ?? this.humanApproval;
   }
 
   findStage(stageId, stages = this.stages) {
@@ -105,6 +154,16 @@ export function parseWorkflow(raw) {
     if (ids.has(stage.id)) throw new Error(`Duplicate stage id "${stage.id}" in workflow "${raw.id}"`);
     ids.add(stage.id);
   }
+  stages.forEach((stage, index) => {
+    if (!stage.onFail) return;
+    const target = stages.findIndex((s) => s.id === stage.onFail.rework);
+    if (target === -1) {
+      throw new Error(`Stage "${stage.id}" on_fail.rework targets unknown top-level stage "${stage.onFail.rework}"`);
+    }
+    if (target >= index) {
+      throw new Error(`Stage "${stage.id}" on_fail.rework must target an earlier stage (got "${stage.onFail.rework}")`);
+    }
+  });
   return new WorkflowDefinition({
     id: raw.id,
     name: raw.name ?? raw.id,
@@ -113,5 +172,7 @@ export function parseWorkflow(raw) {
     trigger: raw.trigger ?? null,
     stages,
     rules: raw.rules ?? [],
+    humanApproval: raw.human_approval ?? raw.humanApproval ?? false,
+    track: raw.track ?? null,
   });
 }

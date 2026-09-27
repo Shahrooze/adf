@@ -8,7 +8,7 @@ what you want to change.
 
 | Path | Type | Default | Meaning |
 | --- | --- | --- | --- |
-| `runtime.defaultExecutor` | string | `"mock"` | Executor used when a workflow stage or `adf agent run` doesn't specify one. `"mock"` never calls an external AI CLI (safe default, used for dry runs and CI); `"cli-adapter"` shells out to a real AI CLI. |
+| `runtime.defaultExecutor` | string | `"mock"` | Executor used when a workflow stage or `adf agent run` doesn't specify one. `"mock"` never calls an external AI CLI (safe default, used for dry runs and CI — every artifact is a template placeholder, and `adf run` / `adf doctor` warn about it); `"cli-adapter"` shells out to a real AI CLI. |
 | `runtime.agentTimeoutMs` | number | `600000` | Default per-agent-execution timeout. |
 | `runtime.maxConcurrentAgents` | number | `4` | Reserved for future scheduler use; today concurrency is governed by `queue.concurrency`. |
 | `runtime.pauseCheckIntervalMs` | number | `250` | How often a paused Agent Runtime execution or Workflow Engine run polls for resume/cancel. |
@@ -23,6 +23,9 @@ what you want to change.
 | `memory.backend` | string | `"file"` | Persisted memory backend. Only `"file"` exists today. |
 | `validation.pipeline` | string[] | `["lint","unit-tests","integration-tests","security-scan","performance","build","review"]` | Step order for `adf validate`, matched against `config/validation-steps.json`. |
 | `validation.continueOnFailure` | boolean | `false` | `false` = fail-fast (stop at the first failing step); `true` = run every step and report the full picture. |
+| `workflow.approvals` | `"workflow"` \| `"auto"` | `"workflow"` | `"workflow"` = honour each workflow's `human_approval` (stages wait for `adf approve`); `"auto"` = approve every stage automatically (logged; CI only). |
+| `workflow.strictChecks` | boolean | `false` | `true` = a gate check (`gate.checks`) with no command in `config/validation-steps.json` fails the gate instead of passing as "unverified". |
+| `workflow.maxReworkRounds` | number | `2` | Default for `on_fail.max_rounds`: how many times a rejection may send work back before the run stops for a human. |
 | `api.port` / `api.host` | number / string | `4870` / `"127.0.0.1"` | REST API bind address (`adf serve`). |
 | `plugins.autoload` | boolean | `true` | Whether `Harness` loads `plugins/*/plugin.json` automatically. |
 | `plugins.directories` | string[] | `["plugins"]` | Directories scanned for plugins, relative to the repo root. |

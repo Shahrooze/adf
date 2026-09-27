@@ -1,9 +1,10 @@
 import { parseArgs } from "../args.mjs";
 import { section } from "../output.mjs";
 import * as codes from "../exit-codes.mjs";
+import { reportRunOutcome } from "./workflow.mjs";
 
 const HELP = `Usage:
-  adf retry <run-id>
+  adf retry <run-id> [--auto-approve]
 
 Re-runs a workflow that ended FAILED, starting from the stage that
 failed (checkpoints record the index of the first not-yet-passed stage,
@@ -32,10 +33,10 @@ export async function retryCommand(harness, argv) {
   const failedStageId = Object.values(checkpoint.stageResults).find((r) => !r.passed && !r.skipped)?.stageId;
   console.log(`Retrying workflow "${checkpoint.workflowId}" run "${runId}" — retrying stage "${failedStageId ?? "?"}"...`);
 
-  const result = await harness.workflowEngine.run(checkpoint.workflowId, { resumeFromRunId: runId });
+  const result = await harness.workflowEngine.run(checkpoint.workflowId, {
+    resumeFromRunId: runId,
+    autoApprove: Boolean(flags["auto-approve"]),
+  });
   section(`Run ${result.id}`);
-  console.log(`Status: ${result.status}`);
-  if (result.error) console.error(`Error: ${result.error}`);
-
-  return result.status === "completed" ? codes.OK : codes.RUN_FAILED;
+  return reportRunOutcome(result);
 }

@@ -52,7 +52,7 @@ permissions:
     - features/<feature-name>/code-review-report.md
 
   deny:
-    - source-code/**
+    - "@source-code"
     - specification.md
     - design.md
     - architecture.md
@@ -109,3 +109,15 @@ tools:
   - git
 supported_artifacts:
   - code-review-report
+# Only these policies/*.md are put in this agent's context bundle (see
+# runtime/src/context/context-manager.mjs). Omit the key to receive all.
+policies:
+  - coding
+  - naming
+  - quality-gates
+# Slash command generated into .claude/commands/code-review.md and
+# .codex/prompts/code-review.md by `./adf commands` (never edit those by hand).
+command:
+  name: code-review
+  description: "Final code quality review before a feature is Release Ready."
+  argument_hint: "<feature-name>"

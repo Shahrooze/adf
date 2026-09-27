@@ -37,6 +37,11 @@ const DEFAULT_RUNTIME_CONFIG = {
     ],
     continueOnFailure: false,
   },
+  // approvals: "workflow" honours each workflow's human_approval setting;
+  // "auto" approves every stage (logged) -- for CI, never the default.
+  // strictChecks: a gate check with no command configured fails the gate
+  // instead of passing it as "unverified".
+  workflow: { approvals: "workflow", strictChecks: false, maxReworkRounds: 2 },
   api: { port: 4870, host: "127.0.0.1" },
   plugins: { autoload: true, directories: ["plugins"] },
 };
@@ -48,6 +53,7 @@ const DEFAULT_GUARDRAILS = {
   dangerousCommandPatterns: [],
   approvalHooks: { onAsk: "log", autoApproveInNonInteractive: false },
   sandbox: { enabled: false, allowedWriteRoots: [] },
+  writeScope: { enabled: false, onViolation: "fail", pathAliases: {}, alwaysAllowed: [".adf/**"] },
 };
 
 function readJsonIfExists(filePath) {

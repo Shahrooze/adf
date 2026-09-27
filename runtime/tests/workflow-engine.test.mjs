@@ -40,7 +40,9 @@ function buildStack(overrides = {}) {
     memoryManager,
     checkpointStore,
     logger: null,
-    config: { runtime: { pauseCheckIntervalMs: 20 }, retry: { maxAttempts: 1 }, ...overrides },
+    // Approvals are exercised by their own tests below; everything else
+    // runs unattended.
+    config: { runtime: { pauseCheckIntervalMs: 20 }, retry: { maxAttempts: 1 }, workflow: { approvals: "auto" }, ...overrides },
   });
   return { tmpRoot, engine, agentRuntime, workflowRegistry, artifactManager, checkpointStore };
 }

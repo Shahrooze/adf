@@ -47,7 +47,7 @@ permissions:
 
   deny:
     - specification.md
-    - source-code/**
+    - "@source-code"
 
 responsibilities:
   - Validate the Business Goal is clear and measurable
@@ -95,3 +95,13 @@ tools:
   - fs
 supported_artifacts:
   - product-review
+# Only these policies/*.md are put in this agent's context bundle (see
+# runtime/src/context/context-manager.mjs). Omit the key to receive all.
+policies:
+  - quality-gates
+# Slash command generated into .claude/commands/product-review.md and
+# .codex/prompts/product-review.md by `./adf commands` (never edit those by hand).
+command:
+  name: product-review
+  description: "Independently review a feature specification before Design."
+  argument_hint: "<feature-name>"

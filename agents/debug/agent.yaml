@@ -64,8 +64,7 @@ permissions:
     - tests/**
 
   write:
-    - src/**
-    - tests/**
+    - "@source-code"
     - README.md
     - docs/**
     - features/<feature-name>/*-implementation-report.md
@@ -138,3 +137,16 @@ tools:
 supported_artifacts:
   - debug-report
   - source-code
+# Only these policies/*.md are put in this agent's context bundle (see
+# runtime/src/context/context-manager.mjs). Omit the key to receive all.
+policies:
+  - coding
+  - security
+  - testing
+  - git
+# Slash command generated into .claude/commands/debug.md and
+# .codex/prompts/debug.md by `./adf commands` (never edit those by hand).
+command:
+  name: debug
+  description: "Reproduce, root-cause and fix a reported bug — or, if it is complex, produce a Root Cause Flow Analysis first."
+  argument_hint: "<bug-id-or-description> [feature-name]"

@@ -32,6 +32,13 @@ function readJsonBody(req) {
 }
 
 // path: "/workflows/:id/run" -> { method, segments: ["workflows", ":id", "run"] }
+// 200 completed, 202 parked on a human decision, 422 failed/cancelled.
+function runHttpStatus(result) {
+  if (result.status === "completed") return 200;
+  if (result.status === "awaiting_approval") return 202;
+  return 422;
+}
+
 function compileRoute(method, path, handler) {
   return { method, segments: path.split("/").filter(Boolean), handler };
 }
@@ -79,7 +86,7 @@ function buildRoutes(harness) {
         executorName: body.executor ?? null,
         task: { stageId: "api", produces: body.produces ?? [], gateStatus: body.gateStatus ?? null, description: body.description ?? "" },
       });
-      return { status: result.status === "completed" ? 200 : 422, body: result };
+      return { status: runHttpStatus(result), body: result };
     }),
 
     compileRoute("GET", "/tools", async () => ({
@@ -102,8 +109,9 @@ function buildRoutes(harness) {
         runId: body.runId ?? null,
         featureDir: body.featureDir ?? null,
         context: body.context ?? {},
+        autoApprove: Boolean(body.autoApprove),
       });
-      return { status: result.status === "completed" ? 200 : 422, body: result };
+      return { status: runHttpStatus(result), body: result };
     }),
 
     compileRoute("GET", "/runs", async () => ({
@@ -135,7 +143,19 @@ function buildRoutes(harness) {
       const checkpoint = harness.checkpointStore.load(params.id);
       if (!checkpoint) return { status: 404, body: { error: `Unknown run "${params.id}"` } };
       const result = await harness.workflowEngine.run(checkpoint.workflowId, { resumeFromRunId: params.id });
-      return { status: result.status === "completed" ? 200 : 422, body: result };
+      return { status: runHttpStatus(result), body: result };
+    }),
+    // body: { approved: true } or { approved: false, reason: "..." }, optional by
+    compileRoute("POST", "/runs/:id/approve", async (_req, params, body) => {
+      const checkpoint = harness.checkpointStore.load(params.id);
+      if (!checkpoint) return { status: 404, body: { error: `Unknown run "${params.id}"` } };
+      try {
+        harness.workflowEngine.decideApproval(params.id, { approved: body.approved !== false, reason: body.reason ?? null, by: body.by ?? "api" });
+      } catch (err) {
+        return { status: 409, body: { error: err.message } };
+      }
+      const result = await harness.workflowEngine.run(checkpoint.workflowId, { resumeFromRunId: params.id });
+      return { status: runHttpStatus(result), body: result };
     }),
     compileRoute("POST", "/runs/:id/cancel", async (_req, params) => {
       harness.workflowEngine.cancel(params.id);
@@ -146,7 +166,7 @@ function buildRoutes(harness) {
       if (!checkpoint) return { status: 404, body: { error: `Unknown run "${params.id}"` } };
       if (checkpoint.status !== "failed") return { status: 409, body: { error: `Run "${params.id}" is "${checkpoint.status}", not "failed"` } };
       const result = await harness.workflowEngine.run(checkpoint.workflowId, { resumeFromRunId: params.id });
-      return { status: result.status === "completed" ? 200 : 422, body: result };
+      return { status: runHttpStatus(result), body: result };
     }),
 
     compileRoute("GET", "/artifacts", async (req) => {

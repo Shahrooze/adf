@@ -54,7 +54,8 @@ permissions:
 
   write:
     - features/<feature-name>/qa-report.md
-    - tests/** (additional test scenarios only, never production code)
+    # additional test scenarios only, never production code
+    - tests/**
 
   deny:
     - specification.md
@@ -106,3 +107,14 @@ tools:
   - terminal
 supported_artifacts:
   - qa-report
+# Only these policies/*.md are put in this agent's context bundle (see
+# runtime/src/context/context-manager.mjs). Omit the key to receive all.
+policies:
+  - testing
+  - quality-gates
+# Slash command generated into .claude/commands/qa.md and
+# .codex/prompts/qa.md by `./adf commands` (never edit those by hand).
+command:
+  name: qa
+  description: "Validate test coverage, acceptance criteria and Definition of Done."
+  argument_hint: "<feature-name>"
