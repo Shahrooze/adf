@@ -2,152 +2,49 @@
 
 Follow these steps in order.
 
----
+## Step 1 - Validate Inputs and Status
 
-## Step 1 - Validate Inputs
+Verify architecture.md, backend-implementation-report.md, frontend-implementation-report.md and qa-report.md exist; if any are missing, stop immediately. Continue only if qa-report.md contains `STATUS: READY_FOR_SECURITY_REVIEW`; otherwise stop and explain why.
 
-Verify the following files exist:
+## Step 2 - Read Context
 
-- architecture.md
-- backend-implementation-report.md
-- frontend-implementation-report.md
-- qa-report.md
+Load context/tech-stack.md and policies/security.md.
 
-If any are missing, stop immediately.
+## Step 3 - Review Authentication and Authorization
 
----
+For every protected endpoint verify authentication is enforced and tokens are validated correctly (signature, expiry, audience). For every endpoint verify authorization is enforced server-side at the API boundary, independent of any frontend check, including object-level checks (a user cannot access another user's resource by guessing an ID — IDOR).
 
-## Step 2 - Validate Status
+## Step 4 - Review Secret Management
 
-Continue only if qa-report.md contains
+Search backend and frontend code, configuration, committed files and logs for hardcoded passwords, credentials, API keys, tokens or connection strings.
 
-STATUS: READY_FOR_SECURITY_REVIEW
+## Step 5 - Walk the OWASP Top 10
 
-Otherwise stop and explain why.
+Evaluate each category explicitly against this feature's code: Broken Access Control, Cryptographic Failures, Injection, Insecure Design, Security Misconfiguration, Vulnerable Components, Authentication Failures, Data Integrity Failures, Logging Failures, SSRF.
 
----
+## Step 6 - Review API Security
 
-## Step 3 - Read Context
+Check rate limiting on sensitive endpoints, transport security (HTTPS assumed), consistent input validation on backend and frontend, and that error responses never leak stack traces or internal details.
 
-Load
+## Step 7 - Review Sensitive Data Exposure
 
-- context/tech-stack.md
-- policies/security.md
+Check API responses, logs, and the frontend bundle for passwords, tokens, internal IDs, or PII that should not be exposed.
 
----
+## Step 8 - Produce Report
 
-## Step 4 - Review Authentication and Authorization
+Record findings as defined in system.md (Findings) and create security-review.md using templates/security-review.md.
 
-For every protected endpoint verify authentication is enforced.
+## Step 9 - Approval Rules
 
-For every endpoint verify authorization is enforced server-side, including
-object-level checks (a user cannot access another user's resource by
-guessing an ID).
+- APPROVED — no Critical, no High findings.
+- APPROVED_WITH_COMMENTS — only Medium/Low findings exist.
+- CHANGES_REQUIRED — any High finding exists.
+- REJECTED — any Critical finding exists.
 
----
+## Step 10 - Final Validation
 
-## Step 5 - Review Secret Management
+Do not finish until Steps 3–9 are complete, findings are prioritized and a recommendation is selected. List every vulnerability explicitly. End security-review.md with the STATUS line mapped from the recommendation (system.md): `STATUS: READY_FOR_OPERATIONS_REVIEW`, `STATUS: CHANGES_REQUIRED` or `STATUS: REJECTED`.
 
-Search backend and frontend code, configuration, and committed files for
-hardcoded credentials, API keys, or connection strings.
+## Step 11 - Sync ADF Core
 
----
-
-## Step 6 - Walk the OWASP Top 10
-
-Evaluate each category explicitly against this feature's code:
-
-Broken Access Control, Cryptographic Failures, Injection, Insecure Design,
-Security Misconfiguration, Vulnerable Components, Authentication Failures,
-Data Integrity Failures, Logging Failures, SSRF.
-
----
-
-## Step 7 - Review API Security
-
-Check rate limiting on sensitive endpoints, consistent input validation, and
-that error responses never leak stack traces or internal details.
-
----
-
-## Step 8 - Review Sensitive Data Exposure
-
-Check API responses, logs, and the frontend bundle for passwords, tokens,
-internal IDs, or PII that should not be exposed.
-
----
-
-## Step 9 - Assign Severity
-
-Each finding must contain
-
-- ID
-- Severity
-- Category
-- Description
-- Recommendation
-
-Allowed Severity
-
-- Critical
-- High
-- Medium
-- Low
-
----
-
-## Step 10 - Produce Security Review Report
-
-Create
-
-security-review.md
-
-using
-
-templates/security-review.md
-
----
-
-## Step 11 - Approval Rules
-
-APPROVED — no Critical, no High findings.
-
-APPROVED_WITH_COMMENTS — only Medium/Low findings exist.
-
-CHANGES_REQUIRED — any High finding exists.
-
-REJECTED — any Critical finding exists.
-
----
-
-## Step 12 - Final Validation
-
-Do not finish until
-
-- Authentication and authorization reviewed
-- Secret management reviewed
-- OWASP Top 10 walked through
-- API security reviewed
-- Sensitive data exposure reviewed
-- Findings prioritized
-- Recommendation selected
-
-Finish with
-
-STATUS: READY_FOR_OPERATIONS_REVIEW
-
-only if the recommendation is APPROVED or APPROVED_WITH_COMMENTS. Otherwise
-list every vulnerability explicitly and stop.
-
----
-
-## Step 13 - Sync ADF Core
-
-Run
-
-node adf-core/cli.mjs sync FEAT-<NNN>
-
-This regenerates adf-core/registry.json, INDEX.md, CONTEXT.md, and
-DEPENDENCY-GRAPH.md, and validates the repository scoped to this feature.
-Must complete with no errors before this stage's gate can be considered
-satisfied.
+Run `node adf-core/cli.mjs sync FEAT-<NNN>` (regenerates adf-core/registry.json, INDEX.md, CONTEXT.md, DEPENDENCY-GRAPH.md and validates this feature). It must pass with no errors before this stage's gate is satisfied.

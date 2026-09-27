@@ -4,183 +4,85 @@ Follow these steps exactly.
 
 ## Ambiguity Rule
 
-This applies at every step below, not only Discovery.
+This applies at every step below, not only Discovery. If anything is ambiguous, unclear, or could be interpreted more than one way, stop and ask the user. Never assume, guess, or decide on your own. Wait for the user's answer before moving to the next step.
 
-If anything is ambiguous, unclear, or could be interpreted more than one
-way, stop and ask the user. Never assume, guess, or decide on your own.
-Wait for the user's answer before moving to the next step.
+## Rework Mode
 
----
+If the task contains a "Rework request" section (injected by the runtime after a reviewer returned CHANGES_REQUIRED/REJECTED, or a human rejected this stage), update your existing specification.md (no new feature or ID) in place instead of starting over:
 
-# Step 1 — Understand the Request
+- Resolve every blocking finding in the named review artifact that falls within your scope; never re-litigate or silently skip one. If resolving a finding needs a business decision, ask the user.
+- List findings outside your scope as such, naming the owning stage, without fixing them.
+- Record what changed, per finding ID, in a "Rework Log" section of specification.md, before the final STATUS line.
+- Never edit the review artifact itself. Then re-run Steps 9, 10, 13 and the sync in Step 14.
 
-Read the user's feature idea.
+## Step 1 — Understand the Request
 
-Summarize it in your own words.
+Read the user's feature idea and summarize it in your own words. If the understanding is incorrect, request clarification.
 
-If the understanding is incorrect, request clarification.
+## Step 2 — Discover Missing Information
 
----
+Identify only the information that is required; do not ask unnecessary questions; group related questions together. Do not proceed to Step 3 until the problem is completely clear — ask and wait, do not assume.
 
-# Step 2 — Discover Missing Information
+Assumptions are a last resort, only for details the user explicitly leaves to your judgment. When one is made, record it explicitly.
 
-Identify only the information that is required.
+## Step 3 — Identify Personas
 
-Do not ask unnecessary questions.
+List every persona involved, each with Goal, Permissions and Responsibilities.
 
-Group related questions together.
+## Step 4 — Create User Stories
 
-Do not proceed to Step 3 until the problem is completely clear. If anything
-is ambiguous, ask the user and wait for their answer — do not assume it.
+Format: As a ... I want ... So that ...
 
-Assumptions are a last resort, only for details the user explicitly leaves
-to your judgment. When one is made,
+## Step 5 — Define Functional Requirements
 
-record it explicitly.
+IDs FR-001, FR-002, ... Each requirement must map to at least one User Story.
 
----
+## Step 6 — Define Business Rules
 
-# Step 3 — Identify Personas
+IDs BR-001, BR-002, ... Business Rules must not contain technical implementation details.
 
-List every persona involved.
+## Step 7 — Define Non Functional Requirements
 
-For each persona define
+Include Performance, Security, Availability, Accessibility, Localization, Observability.
 
-- Goal
-- Permissions
-- Responsibilities
+## Step 8 — Define Acceptance Criteria
 
----
+IDs AC-001, AC-002, ... Every criterion must be Observable, Testable and Binary.
 
-# Step 4 — Create User Stories
+## Step 9 — Review Completeness
 
-Write complete User Stories.
+Verify every User Story has Functional Requirements, every Functional Requirement has Acceptance Criteria, every Business Rule is documented, and no critical ambiguity remains. If any ambiguity is found, stop and ask the user; do not resolve it yourself.
 
-Format
+## Step 10 — Classify Change Size / Track
 
-As a ...
+QUICK_CHANGE only if ALL hold:
 
-I want ...
+- No new domain entity and no database migration.
+- No new or changed public API contract beyond an additive optional field.
+- No authentication, authorization, PII, payment or other security-sensitive change.
+- No new screen (a small change to an existing screen is fine).
+- No new external integration.
+- It fits in a small diff.
 
-So that ...
+Otherwise FULL (and FULL when uncertain). Write a "Delivery Track" section containing a line reading exactly `TRACK: QUICK_CHANGE` or `TRACK: FULL` plus a one-line justification, placed before the final STATUS line (STATUS stays last). If the task says `Track: quick-change` but the change does not qualify, write `TRACK: FULL` and explain why.
 
----
+On the quick-change track the specification may be concise: sections that do not apply can say "N/A — quick change". Functional Requirements, Business Rules and Acceptance Criteria are still required.
 
-# Step 5 — Define Functional Requirements
+## Step 11 — Assign Feature ID
 
-Assign IDs
+Run `node adf-core/cli.mjs next-id` to get the next sequential FEAT-<NNN> (see policies/naming.md). Combine it with a kebab-case slug of the feature: features/FEAT-<NNN>-<slug>/
 
-FR-001
+## Step 12 — Generate Specification
 
-FR-002
+Create features/FEAT-<NNN>-<slug>/specification.md using templates/specification.md.
 
-...
+## Step 13 — Final Validation
 
-Each requirement must map to at least one User Story.
-
----
-
-# Step 6 — Define Business Rules
-
-Assign IDs
-
-BR-001
-
-BR-002
-
-...
-
-Business Rules must not contain technical implementation details.
-
----
-
-# Step 7 — Define Non Functional Requirements
-
-Include
-
-- Performance
-- Security
-- Availability
-- Accessibility
-- Localization
-- Observability
-
----
-
-# Step 8 — Define Acceptance Criteria
-
-Assign IDs
-
-AC-001
-
-AC-002
-
-...
-
-Every criterion must be
-
-- Observable
-- Testable
-- Binary
-
----
-
-# Step 9 — Review Completeness
-
-Verify
-
-- Every User Story has Functional Requirements.
-- Every Functional Requirement has Acceptance Criteria.
-- Every Business Rule is documented.
-- No critical ambiguity remains.
-
-If any ambiguity is found here, stop and ask the user before continuing.
-Do not resolve it yourself.
-
----
-
-# Step 10 — Assign Feature ID
-
-Run
-
-node adf-core/cli.mjs next-id
-
-to get the next sequential FEAT-<NNN> (see policies/naming.md). Derive a
-kebab-case slug from the feature and combine them into the folder name
-
-features/FEAT-<NNN>-<slug>/
-
----
-
-# Step 11 — Generate Specification
-
-Create
-
-features/FEAT-<NNN>-<slug>/specification.md
-
-using
-
-templates/specification.md
-
----
-
-# Step 12 — Final Validation
-
-Do not finish until
-
-- Definition of Ready is satisfied.
-- Quality Gate passes.
-- No unresolved critical questions remain.
-- Every ambiguity encountered along the way was resolved by asking the
-  user, not by assumption.
-
-Finish with
+Do not finish until the Definition of Ready is satisfied, the Quality Gate passes, no unresolved critical questions remain, every ambiguity was resolved by asking the user (not by assumption), and the Delivery Track line is present. Finish with
 
 STATUS: READY_FOR_PRODUCT_REVIEW
 
----
-
-# Step 13 — Register in ADF Core
+## Step 14 — Register in ADF Core
 
 Run, in order:
 
@@ -188,7 +90,4 @@ node adf-core/cli.mjs new FEAT-<NNN>-<slug> --priority <priority> --owner <owner
 
 node adf-core/cli.mjs sync FEAT-<NNN>
 
-This creates features/FEAT-<NNN>-<slug>/feature.json (the Feature Registry
-entry — see adf-core/schema/feature.schema.md) and regenerates
-adf-core/registry.json, INDEX.md, CONTEXT.md, and DEPENDENCY-GRAPH.md. The
-sync command must complete with no errors before this stage is done.
+This creates features/FEAT-<NNN>-<slug>/feature.json (the Feature Registry entry — see adf-core/schema/feature.schema.md) and regenerates adf-core/registry.json, INDEX.md, CONTEXT.md, and DEPENDENCY-GRAPH.md. The sync must complete with no errors before this stage is done.
