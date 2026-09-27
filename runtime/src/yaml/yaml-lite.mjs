@@ -5,7 +5,8 @@
 // mappings), block scalars ("|" literal, ">" folded), single/double quoted
 // scalars, plain scalars, comments, blank lines, null ("~"/"null"/empty),
 // booleans, numbers. NOT supported (and not needed by this repo's files):
-// flow style ({}/[]), anchors/aliases, multi-document streams, tags.
+// flow mappings and nested flow collections (a flat flow sequence of
+// scalars like `[a, b]` IS supported), anchors/aliases, multi-document streams, tags.
 //
 // This exists because adf-core is intentionally zero-dependency (see
 // adf-core/README.md) and the Harness follows the same principle: no
@@ -13,18 +14,48 @@
 
 import fs from "node:fs";
 
-function stripComment(line) {
-  let inSingle = false;
-  let inDouble = false;
+// A quote only opens a quoted scalar at the start of a token (line start,
+// or after whitespace following ":", "-", ",", "[" or "{"). An apostrophe
+// inside plain prose ("Don't guess") is just a character -- treating it as
+// an opening quote would swallow a trailing "# comment" or hide a ": ".
+function opensQuote(line, i) {
+  let j = i - 1;
+  while (j >= 0 && line[j] === " ") j--;
+  if (j < 0) return true;
+  if (!":-,[{".includes(line[j])) return false;
+  return j === i - 1 ? line[j] === "[" || line[j] === "{" || line[j] === "," : true;
+}
+
+// Walks `line`, calling visit(ch, i) for every character outside quoted
+// scalars; visit returning true stops the walk and returns i.
+function scanUnquoted(line, visit) {
+  let quote = null;
   for (let i = 0; i < line.length; i++) {
     const ch = line[i];
-    if (ch === "'" && !inDouble) inSingle = !inSingle;
-    else if (ch === '"' && !inSingle) inDouble = !inDouble;
-    else if (ch === "#" && !inSingle && !inDouble) {
-      if (i === 0 || /\s/.test(line[i - 1])) return line.slice(0, i);
+    if (quote === "'") {
+      if (ch === "'") {
+        if (line[i + 1] === "'") i++;
+        else quote = null;
+      }
+      continue;
     }
+    if (quote === '"') {
+      if (ch === "\\") i++;
+      else if (ch === '"') quote = null;
+      continue;
+    }
+    if ((ch === "'" || ch === '"') && opensQuote(line, i)) {
+      quote = ch;
+      continue;
+    }
+    if (visit(ch, i)) return i;
   }
-  return line;
+  return -1;
+}
+
+function stripComment(line) {
+  const at = scanUnquoted(line, (ch, i) => ch === "#" && (i === 0 || /\s/.test(line[i - 1])));
+  return at === -1 ? line : line.slice(0, at);
 }
 
 const KEY_LINE_RE = /^[A-Za-z0-9_.$<>*/-]+:(\s.*|)$/;
@@ -101,6 +132,7 @@ function parseScalar(raw) {
     try {
       return JSON.parse(s);
     } catch {
+      if (s.startsWith("[") && !/[[{]/.test(s.slice(1, -1))) return parseFlowSequence(s);
       return s;
     }
   }
@@ -110,20 +142,26 @@ function parseScalar(raw) {
 // Splits "key: value" on the first unquoted colon followed by a space or
 // end-of-line (so URLs like "http://x" inside quoted values are untouched).
 function splitKeyValue(line) {
-  let inSingle = false;
-  let inDouble = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (ch === "'" && !inDouble) inSingle = !inSingle;
-    else if (ch === '"' && !inSingle) inDouble = !inDouble;
-    else if (ch === ":" && !inSingle && !inDouble) {
-      const next = line[i + 1];
-      if (next === undefined || next === " ") {
-        return [line.slice(0, i), line.slice(i + 1).trim()];
-      }
+  const at = scanUnquoted(line, (ch, i) => ch === ":" && (line[i + 1] === undefined || line[i + 1] === " "));
+  return at === -1 ? null : [line.slice(0, at), line.slice(at + 1).trim()];
+}
+
+// Flow sequence of scalars: [a, "b, c", 'd'] -> ["a", "b, c", "d"].
+// Nested flow collections are not part of the supported subset.
+function parseFlowSequence(s) {
+  const inner = s.slice(1, -1).trim();
+  if (inner === "") return [];
+  const items = [];
+  let start = 0;
+  scanUnquoted(inner, (ch, i) => {
+    if (ch === ",") {
+      items.push(inner.slice(start, i));
+      start = i + 1;
     }
-  }
-  return null;
+    return false;
+  });
+  items.push(inner.slice(start));
+  return items.map((item) => parseScalar(item));
 }
 
 class LineReader {

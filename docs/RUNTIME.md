@@ -33,7 +33,10 @@ bugs.
 
 1. **Build context.** `ContextManager.build()` gathers policies, project
    context, and the stage's `consumes` artifacts into one `ContextBundle`,
-   trimmed to `runtime.config.json`'s implicit character budget.
+   trimmed to `runtime.config.json`'s implicit character budget. Only the
+   policies listed in the agent's `agent.yaml` `policies:` are included
+   (e.g. Security Review gets `security` + `quality-gates`, not
+   `accessibility`); an agent without the key gets them all.
 2. **Resolve an executor.** By name (`--executor`, a workflow stage's
    `executor:`), or `runtime.defaultExecutor` (default: `"mock"`).
 3. **Run it.** The executor is an async generator
@@ -75,7 +78,7 @@ subprocess, suspending it at the OS level.
 | Executor | File | Behavior |
 | --- | --- | --- |
 | `mock` | `runtime/src/executors/mock-executor.mjs` | Deterministic, no network/LLM calls. For each produced `.md` filename, resolves the matching `templates/*.md` (falling back to a generic skeleton), rewrites its `STATUS:` line to the stage's gate status. Used for tests, `adf doctor`-adjacent dry runs, and demonstrating the whole Workflow Engine without any external dependency. |
-| `cli-adapter` | `runtime/src/executors/cli-adapter-executor.mjs` | Spawns a configured AI CLI (`runtime.config.json`'s `runtime.executors["cli-adapter"]`, default `claude -p`), writes the agent's system prompt + instructions + task + context bundle to its stdin, captures stdout as the result. This is what makes the Harness usable with any AI CLI a project already has, not one hardcoded vendor. |
+| `cli-adapter` | `runtime/src/executors/cli-adapter-executor.mjs` | Spawns a configured AI CLI (`runtime.config.json`'s `runtime.executors["cli-adapter"]`, default `claude -p`), writes the agent's system prompt + instructions + task + context bundle to its stdin, captures stdout as the result. This is what makes the Harness usable with any AI CLI a project already has, not one hardcoded vendor. It pre-authorizes (`--allowedTools`) only the tools the agent declares **and** `config/guardrails.json` allows it, states the agent's write scope in the prompt, and — since it cannot mediate the child's file writes — relies on the Workflow Engine's write-scope diff to enforce `agent.yaml` permissions afterwards. |
 
 Adding a new executor (a direct API integration, a different CLI) means
 implementing `AgentExecutor` (`runtime/src/executors/agent-executor.mjs`)

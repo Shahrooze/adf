@@ -37,6 +37,11 @@ function tmpHarness() {
   fs.mkdirSync(harness.checkpointStore.dir, { recursive: true });
   harness.logger.logDir = path.join(tmpRoot, "logs");
   fs.mkdirSync(harness.logger.logDir, { recursive: true });
+  // Feature dirs live in tmp (outside the repo), and other test files may
+  // be writing to the repo concurrently -- neither is what the write-scope
+  // diff is for (it has its own tests). Approvals likewise.
+  harness.config.guardrails.writeScope = { ...harness.config.guardrails.writeScope, enabled: false };
+  harness.config.workflow = { ...harness.config.workflow, approvals: "auto" };
   return { harness, tmpRoot };
 }
 

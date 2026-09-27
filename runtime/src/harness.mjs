@@ -24,7 +24,7 @@ import { PluginLoader } from "./plugins/plugin-loader.mjs";
 import { PluginContext } from "./plugins/plugin-api.mjs";
 
 export class Harness {
-  constructor({ runId = null, onAsk = null } = {}) {
+  constructor({ runId = null, onAsk = null, onApproval = null } = {}) {
     this.config = loadRuntimeConfig();
     this.logger = new Logger({ runId });
 
@@ -54,9 +54,20 @@ export class Harness {
       config: this.config,
     });
     this.agentRuntime.registerExecutor("mock", new MockExecutor());
-    this.agentRuntime.registerExecutor("cli-adapter", new CliAdapterExecutor(this.config.runtime.executors?.["cli-adapter"] ?? {}));
+    this.agentRuntime.registerExecutor(
+      "cli-adapter",
+      new CliAdapterExecutor({ ...(this.config.runtime.executors?.["cli-adapter"] ?? {}), policyEngine: this.policyEngine })
+    );
 
     this.checkpointStore = new CheckpointStore();
+
+    this.validationPipeline = new ValidationPipeline({
+      steps: this.config.validation.pipeline,
+      toolRuntime: this.toolRuntime,
+      logger: this.logger,
+      continueOnFailure: this.config.validation.continueOnFailure,
+    });
+
     this.workflowEngine = new WorkflowEngine({
       workflowRegistry: this.workflowRegistry,
       agentRuntime: this.agentRuntime,
@@ -64,15 +75,10 @@ export class Harness {
       memoryManager: this.memoryManager,
       toolRuntime: this.toolRuntime,
       checkpointStore: this.checkpointStore,
+      validationPipeline: this.validationPipeline,
+      onApproval,
       logger: this.logger,
       config: this.config,
-    });
-
-    this.validationPipeline = new ValidationPipeline({
-      steps: this.config.validation.pipeline,
-      toolRuntime: this.toolRuntime,
-      logger: this.logger,
-      continueOnFailure: this.config.validation.continueOnFailure,
     });
 
     this.queue = new ExecutionQueue({ concurrency: this.config.queue.concurrency });

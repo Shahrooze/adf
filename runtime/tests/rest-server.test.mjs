@@ -10,6 +10,8 @@ import { REPO_ROOT } from "../src/config/paths.mjs";
 async function buildServer() {
   const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), "adf-rest-"));
   const harness = new Harness();
+  harness.config.guardrails.writeScope = { ...harness.config.guardrails.writeScope, enabled: false };
+  harness.config.workflow = { ...harness.config.workflow, approvals: "auto" };
   harness.checkpointStore.dir = path.join(tmpRoot, "checkpoints");
   fs.mkdirSync(harness.checkpointStore.dir, { recursive: true });
   harness.logger.logDir = path.join(tmpRoot, "logs");

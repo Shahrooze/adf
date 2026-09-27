@@ -1,0 +1,127 @@
+id: quick-change
+
+name: Quick Change Workflow
+
+version: 1.0.0
+
+description: |
+  A lighter track for small, low-risk changes (a field, a validation rule,
+  a copy or behaviour tweak on an existing screen). Five agent runs
+  instead of eleven: Specification -> Backend ‖ Frontend -> QA -> Code
+  Review. Product Review, Design, Architecture, Architecture Review,
+  Security Review and Operations Readiness are skipped, so the track is
+  only allowed when the Feature Agent itself classifies the change as
+  QUICK_CHANGE (see agents/feature/instructions.md, "Delivery Track").
+  If it writes TRACK: FULL, the track-check stage stops this run: use
+  workflows/feature-development.yaml instead.
+
+  The same enforcement as the full track applies: deterministic gate
+  checks, write-scope, reviewer rework loops and human approval.
+
+trigger:
+  type: change
+
+# Stated in every agent's task ("Track: quick-change") so agents do not
+# expect design.md / architecture.md / review documents on this track.
+track: quick-change
+
+human_approval: true
+
+stages:
+  - id: feature
+    agent: feature-agent
+    produces:
+      - specification.md
+    gate:
+      name: Feature Gate
+      required_artifacts:
+        - specification.md
+      status: READY_FOR_PRODUCT_REVIEW
+
+  - id: track-check
+    gate:
+      name: Track Gate
+      required_artifacts:
+        - specification.md
+      markers:
+        - "TRACK: QUICK_CHANGE"
+
+  - id: implementation
+    parallel:
+      - id: backend-implementation
+        agent: backend-agent
+        consumes:
+          - specification.md
+        produces:
+          - backend-implementation-report.md
+        gate:
+          name: Backend Gate
+          required_artifacts:
+            - backend-implementation-report.md
+          checks:
+            - build
+            - unit-tests
+          status: READY_FOR_FRONTEND
+
+      - id: frontend-implementation
+        agent: frontend-agent
+        consumes:
+          - specification.md
+        produces:
+          - frontend-implementation-report.md
+        gate:
+          name: Frontend Gate
+          required_artifacts:
+            - frontend-implementation-report.md
+          checks:
+            - build
+            - unit-tests
+          status: READY_FOR_QA
+
+  - id: qa
+    agent: qa-agent
+    on_fail:
+      rework: implementation
+      max_rounds: 2
+    consumes:
+      - specification.md
+      - backend-implementation-report.md
+      - frontend-implementation-report.md
+    produces:
+      - qa-report.md
+    gate:
+      name: QA Gate
+      required_artifacts:
+        - qa-report.md
+      checks:
+        - unit-tests
+        - integration-tests
+      status: READY_FOR_SECURITY_REVIEW
+
+  - id: code-review
+    agent: code-review-agent
+    on_fail:
+      rework: implementation
+      max_rounds: 2
+    consumes:
+      - specification.md
+      - backend-implementation-report.md
+      - frontend-implementation-report.md
+      - qa-report.md
+      - backend-source-code
+      - frontend-source-code
+    produces:
+      - code-review-report.md
+    gate:
+      name: Code Quality Gate
+      required_artifacts:
+        - code-review-report.md
+      checks:
+        - lint
+      status: RELEASE_READY
+
+rules:
+  - Only for changes the Feature Agent classified as TRACK: QUICK_CHANGE; anything else goes through feature-development.
+  - Backend and Frontend run in parallel against specification.md; a layer with nothing to change still writes its report saying so.
+  - Code Review also covers basic security hygiene on this track (there is no Security Review stage).
+  - A reviewer's rejection is sent back to the implementation stage, at most twice, then stops for a human.

@@ -21,9 +21,28 @@ Everything below this point describes ADF's staged-gate *methodology* — which 
 The Harness owns agent lifecycle, workflow orchestration (sequential, parallel, and conditional stages), tool execution, context assembly, memory, artifact tracking, a validation pipeline, retries with rollback, permission guardrails, structured logging, observability, and a plugin system — all driven by plain config files, zero npm dependencies. Agents stay exactly what they are on this page: a single-responsibility prompt with declared inputs and outputs. The Harness is what coordinates them.
 
     ./adf run feature-development --feature-dir features/my-feature --report
-    ./adf run parallel-development --feature-dir features/my-feature   # Backend + Frontend in parallel
+    ./adf run quick-change --feature-dir features/my-change            # 5-agent track for small changes
+    ./adf approve <run-id>                                             # human approval between stages
     ./adf serve                                                        # REST API over the same runtime
     ./adf --help
+
+Before the first real run:
+
+1. Set runtime.defaultExecutor to "cli-adapter" in runtime.config.json (the default "mock" executor runs no AI — it fills templates, and adf run warns about it).
+2. Put your project's real build / test / lint commands in config/validation-steps.json — workflow gates run them (gate.checks), so a stage cannot pass on the agent's word alone.
+3. Point config/guardrails.json writeScope.pathAliases at your source layout (defaults: src/backend/**, src/frontend/**).
+4. Run ./adf doctor — it lists anything that would leave a gate unenforced.
+
+What the Harness enforces, not just asks for:
+
+* Gates have two sides: the artifact's STATUS line (what the agent claims) and gate.checks run by the Harness (what is true).
+* Every file a stage changes must be inside that agent's agent.yaml permissions (git-diff based, so it also holds for an external AI CLI).
+* A reviewer's CHANGES_REQUIRED / REJECTED sends the findings back to the author stage (on_fail.rework), at most max_rounds times, then stops for a human.
+* human_approval: each stage waits for a human decision (interactive y/N/r, or adf approve / POST /runs/:id/approve).
+* The cli-adapter only pre-authorizes tools that guardrails allow for that agent.
+* Each agent receives only the policies its agent.yaml lists.
+
+A complete worked example of one feature through all eleven stages lives in examples/features/archive-project/ (and is checked against every gate by the test suite).
 
 See docs/ARCHITECTURE.md for the full component map, docs/WORKFLOWS.md for the declarative workflow format (including the parallel/conditional example above), docs/RUNTIME.md for the Agent Runtime's execution model, docs/CONFIGURATION.md for every config file, docs/PLUGINS.md for extending it without touching core, docs/DEVELOPER-GUIDE.md for the folder structure and contribution conventions, docs/EXAMPLES.md for more worked examples, and MIGRATION.md for what changed and why it's backward-compatible.
 
@@ -299,6 +318,8 @@ Quality Gates
 
 Every stage is guarded by a Quality Gate: the next stage cannot start until the required artifact exists and reaches its passing status. See policies/quality-gates.md for Pass Criteria, Fail Criteria, Required Artifacts and Blocking Conditions for every gate, and workflows/feature-development.yaml for the machine-readable definitions.
 
+Under the Harness a gate also runs its deterministic checks (build, tests, lint — config/validation-steps.json), rejects any file written outside the agent's permissions, and — for review gates — routes a CHANGES_REQUIRED / REJECTED verdict back to the author for rework instead of retrying the reviewer. See docs/WORKFLOWS.md.
+
 Feature Gate → Product Gate → Design Gate → Architecture Gate → Backend Gate → Frontend Gate → QA Gate → Security Gate → Operations Gate → Code Quality Gate → Release Gate
 
 ⸻
@@ -325,8 +346,7 @@ Every adf-core command is also reachable through the unified Harness CLI as adf 
 
 Project Structure
 
-.claude/
-.codex/
+.claude/commands/, .codex/prompts/ — generated from agents/ by ./adf commands (never edit by hand)
 adf-core/ — pre-Harness feature registry, project index, and validation CLI (unchanged, still fully supported)
 adf.config.json — this project's identity + technology stack, written by node adf-core/cli.mjs init
 runtime.config.json — Harness engine configuration (see docs/CONFIGURATION.md)
@@ -335,10 +355,11 @@ agents/
 context/
 policies/
 templates/
-workflows/ — including workflows/parallel-development.yaml, the parallel/conditional example
+workflows/ — feature-development (full), quick-change (small changes), parallel-development (parallel/conditional example)
+examples/ — a complete worked feature (archive-project) through every stage
 config/ — tools.json, guardrails.json, artifact-types.json, validation-steps.json, mcp-servers.json
 plugins/ — drop-in Harness plugins (see docs/PLUGINS.md)
-runtime/ — the Agent Runtime / Harness implementation and its own test suite (see docs/ARCHITECTURE.md)
+runtime/ — the Agent Runtime / Harness implementation and its own test suite (see docs/ARCHITECTURE.md; run everything with npm test)
 docs/ — Harness architecture, runtime, workflows, configuration, plugins, developer guide, examples
 features/ — created per project as features are started
 _archive/ — created per project as features are archived
@@ -420,7 +441,7 @@ Principles
 
 * One responsibility per agent.
 * One artifact per stage.
-* Human review before progressing.
+* Human review before progressing (enforced: human_approval + adf approve).
 * Business decisions never leak into implementation.
 * UX/UI decisions never leak into backend architecture.
 * Architecture decisions never leak into product discovery.
@@ -458,6 +479,8 @@ Operations Readiness Review
 Code Review
 ↓
 Release Ready
+
+Small, low-risk changes (classified TRACK: QUICK_CHANGE by the Feature Agent) can use the quick-change track instead: Feature Specification → Backend ‖ Frontend → QA → Code Review.
 
 ⸻
 

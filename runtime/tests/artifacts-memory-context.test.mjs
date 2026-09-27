@@ -6,6 +6,7 @@ import path from "node:path";
 import { ArtifactManager, ARTIFACT_STATUSES } from "../src/artifacts/artifact-manager.mjs";
 import { MemoryManager } from "../src/memory/memory-store.mjs";
 import { ContextManager } from "../src/context/context-manager.mjs";
+import { REPO_ROOT } from "../src/config/paths.mjs";
 
 function tmpDir(name) {
   return fs.mkdtempSync(path.join(os.tmpdir(), `adf-${name}-`));
@@ -111,4 +112,26 @@ test("ContextManager trims when the bundle exceeds the character budget", () => 
   assert.equal(bundle.trimmed, true);
   assert.ok(bundle.toPromptText().length <= 2500);
   assert.ok(bundle.artifacts[0].content.includes("trimmed"));
+});
+
+test("ContextManager gives an agent only the policies its agent.yaml lists", async () => {
+  const { loadAgentRegistry } = await import("../src/registry/agent-registry.mjs");
+  const registry = loadAgentRegistry();
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "adf-ctx-policies-"));
+  const cm = new ContextManager({
+    artifactManager: new ArtifactManager({ stateDir: path.join(tmp, "a"), repoRoot: REPO_ROOT }),
+    memoryManager: new MemoryManager({ memoryDir: path.join(tmp, "m") }),
+  });
+  const security = cm.build({ agent: registry.get("security-review-agent") });
+  assert.deepEqual(security.policies.map((p) => p.name).sort(), ["quality-gates.md", "security.md"]);
+
+  // No `policies:` key -> every policy (pre-existing behaviour).
+  const all = cm.build({ agent: { id: "legacy", policies: null } });
+  assert.ok(all.policies.length >= 10);
+
+  // Every agent's list names real policy files.
+  const known = new Set(fs.readdirSync(path.join(REPO_ROOT, "policies")).map((f) => f.replace(/\.md$/, "")));
+  for (const agent of registry.list()) {
+    for (const name of agent.policies ?? []) assert.ok(known.has(name), `${agent.id} lists unknown policy "${name}"`);
+  }
 });

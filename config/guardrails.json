@@ -11,7 +11,9 @@
     "mcp": "ask"
   },
   "agentOverrides": {
-    "qa-agent": { "fs": "allow", "terminal": "deny" },
+    "backend-agent": { "terminal": "allow" },
+    "frontend-agent": { "terminal": "allow" },
+    "qa-agent": { "fs": "allow", "terminal": "allow" },
     "security-review-agent": { "fs": "allow", "terminal": "deny" },
     "code-review-agent": { "fs": "allow", "terminal": "deny" },
     "operations-readiness-agent": { "fs": "allow", "terminal": "deny" },
@@ -40,5 +42,22 @@
   "sandbox": {
     "enabled": false,
     "allowedWriteRoots": ["features", ".adf", "runtime/examples"]
+  },
+  "writeScope": {
+    "enabled": true,
+    "onViolation": "fail",
+    "pathAliases": {
+      "backend-code": ["src/backend/**", "tests/backend/**"],
+      "frontend-code": ["src/frontend/**", "tests/frontend/**"],
+      "source-code": ["src/**", "tests/**"]
+    },
+    "alwaysAllowed": [
+      ".adf/**",
+      "adf-core/registry.json",
+      "adf-core/INDEX.md",
+      "adf-core/CONTEXT.md",
+      "adf-core/DEPENDENCY-GRAPH.md",
+      "features/<feature-name>/feature.json"
+    ]
   }
 }

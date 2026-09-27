@@ -1,9 +1,10 @@
 import { parseArgs } from "../args.mjs";
 import { section } from "../output.mjs";
 import * as codes from "../exit-codes.mjs";
+import { reportRunOutcome } from "./workflow.mjs";
 
 const HELP = `Usage:
-  adf resume <run-id>
+  adf resume <run-id> [--auto-approve]
 
 Resumes a paused or interrupted workflow run from its last checkpoint
 (.adf/checkpoints/<run-id>.json), continuing from the first not-yet-passed
@@ -24,12 +25,10 @@ export async function resumeCommand(harness, argv) {
   const checkpoint = harness.checkpointStore.load(runId);
   console.log(`Resuming workflow "${checkpoint.workflowId}" run "${runId}" from stage index ${checkpoint.currentStageIndex}...`);
 
-  const result = await harness.workflowEngine.run(checkpoint.workflowId, { resumeFromRunId: runId });
+  const result = await harness.workflowEngine.run(checkpoint.workflowId, {
+    resumeFromRunId: runId,
+    autoApprove: Boolean(flags["auto-approve"]),
+  });
   section(`Run ${result.id}`);
-  console.log(`Status: ${result.status}`);
-  if (result.error) console.error(`Error: ${result.error}`);
-
-  if (result.status === "completed") return codes.OK;
-  if (result.status === "cancelled") return codes.RUN_CANCELLED;
-  return codes.RUN_FAILED;
+  return reportRunOutcome(result);
 }

@@ -28,7 +28,7 @@ test("e2e: run a parallel workflow through the real CLI binary and inspect it en
   const featureDir = `features/__e2e_${Date.now()}__`;
   const runId = `e2e-run-${Date.now()}`;
 
-  const runResult = adf(["run", "parallel-development", "--feature-dir", featureDir, "--run-id", runId, "--report"]);
+  const runResult = adf(["run", "parallel-development", "--feature-dir", featureDir, "--run-id", runId, "--report", "--auto-approve"]);
   assert.equal(runResult.code, 0, runResult.stdout + runResult.stderr);
   assert.match(runResult.stdout, /finished with status: completed/);
   assert.match(runResult.stdout, /Report written to/);
@@ -125,7 +125,7 @@ test("e2e: a workflow with an unsatisfiable gate fails through the CLI, and adf 
   const runId = `e2e-fail-run-${Date.now()}`;
 
   try {
-    const runResult = adf(["run", workflowId, "--feature-dir", featureDir, "--run-id", runId]);
+    const runResult = adf(["run", workflowId, "--feature-dir", featureDir, "--run-id", runId, "--auto-approve"]);
     assert.equal(runResult.code, 3); // RUN_FAILED
     assert.match(runResult.stdout, /finished with status: failed/);
     assert.match(runResult.stdout, /FAIL.*will-fail/);
@@ -136,9 +136,34 @@ test("e2e: a workflow with an unsatisfiable gate fails through the CLI, and adf 
     const retryResult = adf(["retry", runId]);
     assert.equal(retryResult.code, 3);
     assert.match(retryResult.stdout, /Retrying workflow/);
-    assert.match(retryResult.stdout, /Status: failed/);
+    assert.match(retryResult.stdout, /finished with status: failed/);
   } finally {
     fs.rmSync(workflowPath, { force: true });
+    cleanupFeatureDir(featureDir);
+  }
+});
+
+test("e2e: without --auto-approve a run parks after each stage until adf approve (and --reject needs a reason)", () => {
+  const featureDir = `features/__e2e_approve_${Date.now()}__`;
+  const runId = `e2e-approve-run-${Date.now()}`;
+  try {
+    let result = adf(["run", "quick-change", "--feature-dir", featureDir, "--run-id", runId], { input: "" });
+    assert.equal(result.code, 5); // AWAITING_APPROVAL
+    assert.match(result.stdout, /status: awaiting_approval/);
+    assert.match(result.stdout, new RegExp(`adf approve ${runId}`));
+
+    // The mock feature agent writes no "TRACK: QUICK_CHANGE" line, so after
+    // approving the spec the track gate must stop the quick-change track.
+    const rejectWithoutReason = adf(["approve", runId, "--reject"]);
+    assert.equal(rejectWithoutReason.code, 2);
+
+    result = adf(["approve", runId, "--by", "e2e"]);
+    assert.equal(result.code, 3);
+    assert.match(result.stdout, /track-check — .*TRACK: QUICK_CHANGE/);
+
+    const status = adf(["status", runId]);
+    assert.match(status.stdout, /\[approved\] feature by e2e/);
+  } finally {
     cleanupFeatureDir(featureDir);
   }
 });

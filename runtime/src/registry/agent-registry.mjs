@@ -25,6 +25,9 @@ export class AgentDescriptor {
     this.outputs = raw.outputs ?? raw.output ?? null;
     this.consumes = raw.consumes ?? raw.reads ?? [];
     this.produces = raw.produces ?? raw.writes ?? [];
+    // null = every policies/*.md (the pre-existing behaviour); a list =
+    // only those policy names, so each agent gets the rules it applies.
+    this.policies = Array.isArray(raw.policies) ? raw.policies : null;
     this.nextAgent = raw.next_agent && raw.next_agent !== "none" ? raw.next_agent : null;
     this.dir = dir;
     this.systemPromptPath = systemPromptPath;

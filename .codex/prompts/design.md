@@ -3,123 +3,33 @@ description: Create the UI/UX design for an approved feature specification.
 argument-hint: <feature-name>
 ---
 
-# Design Command
+<!-- GENERATED from agents/design/agent.yaml by `./adf commands` — do not edit. Change agents/design/ instead. -->
 
-You are executing the ADF Design Agent.
+# Design Agent
 
-## Objective
+You are executing the ADF Design Agent for: $ARGUMENTS
 
-Transform a Product-Review-approved Feature Specification into a complete UI/UX and Product Design document.
+Read these two files in full and follow them exactly — they are the whole
+definition of this agent:
 
-Never write code.
+1. agents/design/system.md — role, responsibilities and hard constraints
+2. agents/design/instructions.md — the step-by-step procedure, inputs, outputs and final STATUS
 
-Never make backend, database, or API design decisions.
+`<feature-name>` in those files is the feature named above; its artifacts
+live under `features/<feature-name>/`.
 
----
+## Write scope
 
-## Load Context
+When this agent runs under the ADF Harness, every file it changes is
+checked against agents/design/agent.yaml `permissions` (`@alias` entries are
+defined in config/guardrails.json `writeScope.pathAliases`).
 
-Read:
+May write:
 
-- features/<feature-name>/specification.md
-- features/<feature-name>/product-review.md
-- templates/design.md
-- context/**
-- policies/design.md
-- policies/accessibility.md
+- features/<feature-name>/design.md
 
----
+Must never modify:
 
-## Validate
-
-Continue ONLY IF
-
-STATUS: READY_FOR_DESIGN
-
-exists inside product-review.md
-
-Otherwise stop.
-
----
-
-## Produce
-
-Create
-
-features/<feature-name>/design.md
-
----
-
-The design must include
-
-# User Journey
-
-# User Flow
-
-# Screen List
-
-# Navigation
-
-# Component Hierarchy
-
-# Forms
-
-# Validation Rules
-
-# Loading States
-
-# Empty States
-
-# Error States
-
-# Success States
-
-# Responsive Behavior
-
-# Accessibility
-
-# Design Tokens
-
-# Interaction Notes
-
-# Open UX Questions
-
----
-
-Do NOT
-
-- Generate code
-
-- Design database schema
-
-- Design API contracts
-
-- Design backend architecture
-
----
-
-Requirements
-
-- Every Functional Requirement must map to at least one screen
-- Every data-driven screen must document Loading, Empty, Error and Success states
-- Accessibility must be documented per screen
-- Design Tokens must be defined or explicitly reused
-
----
-
-When finished
-
-STATUS: READY_FOR_ARCHITECTURE
-
----
-
-## Sync ADF Core
-
-Run:
-
-node adf-core/cli.mjs sync <feature-name>
-
-This regenerates adf-core/registry.json, INDEX.md, CONTEXT.md, and
-DEPENDENCY-GRAPH.md, and validates the repository scoped to this feature.
-Must complete with no errors before this stage's gate can be considered
-satisfied.
+- @source-code
+- specification.md
+- architecture.md

@@ -54,6 +54,13 @@ export async function statusCommand(harness, argv) {
   console.log(`Status: ${checkpoint.status}`);
   console.log(`Stage index: ${checkpoint.currentStageIndex}`);
   if (checkpoint.error) console.log(`Error: ${checkpoint.error}`);
+  if (checkpoint.status === "awaiting_approval" && checkpoint.pendingApproval) {
+    console.log(`Awaiting approval of stage "${checkpoint.pendingApproval.stageId}" — adf approve ${runId} [--reject --reason "..."]`);
+  }
+  for (const event of checkpoint.history ?? []) {
+    if (event.type === "rework") console.log(`  [rework] ${event.fromStage} -> ${event.toStage} (round ${event.round}): ${String(event.reason ?? "").split("\n")[0]}`);
+    if (event.type === "approval") console.log(`  [${event.approved ? "approved" : "rejected"}] ${event.stageId} by ${event.by ?? "?"}${event.reason ? `: ${event.reason}` : ""}`);
+  }
   for (const [stageId, r] of Object.entries(checkpoint.stageResults ?? {})) {
     console.log(`  [${r.skipped ? "skip" : r.passed ? "ok  " : "FAIL"}] ${stageId}`);
   }

@@ -52,15 +52,14 @@ permissions:
     - templates/**
 
   write:
-    - src/**
-    - tests/**
+    - "@frontend-code"
     - features/<feature-name>/frontend-implementation-report.md
 
   deny:
     - specification.md
     - design.md
     - architecture.md
-    - backend source code
+    - "@backend-code"
 
 responsibilities:
   - Implement UI
@@ -115,3 +114,18 @@ supported_artifacts:
   - implementation-report
   - source-code
   - tests
+# Only these policies/*.md are put in this agent's context bundle (see
+# runtime/src/context/context-manager.mjs). Omit the key to receive all.
+policies:
+  - frontend
+  - accessibility
+  - coding
+  - testing
+  - naming
+  - quality-gates
+# Slash command generated into .claude/commands/frontend.md and
+# .codex/prompts/frontend.md by `./adf commands` (never edit those by hand).
+command:
+  name: frontend
+  description: "Implement the frontend of an approved feature."
+  argument_hint: "<feature-name>"

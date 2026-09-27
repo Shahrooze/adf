@@ -3,115 +3,34 @@ description: Independently review a feature for security vulnerabilities.
 argument-hint: <feature-name>
 ---
 
-# Security Review Command
+<!-- GENERATED from agents/security-review/agent.yaml by `./adf commands` — do not edit. Change agents/security-review/ instead. -->
 
-You are executing the ADF Security Review Agent.
+# Security Review Agent
 
-## Objective
+You are executing the ADF Security Review Agent for: $ARGUMENTS
 
-Independently review backend and frontend source code for authentication,
-authorization, secret handling, OWASP Top 10, API security, input
-validation, and sensitive data exposure issues.
+Read these two files in full and follow them exactly — they are the whole
+definition of this agent:
 
-Never modify code.
+1. agents/security-review/system.md — role, responsibilities and hard constraints
+2. agents/security-review/instructions.md — the step-by-step procedure, inputs, outputs and final STATUS
 
----
+`<feature-name>` in those files is the feature named above; its artifacts
+live under `features/<feature-name>/`.
 
-## Load Context
+## Write scope
 
-Read:
+When this agent runs under the ADF Harness, every file it changes is
+checked against agents/security-review/agent.yaml `permissions` (`@alias` entries are
+defined in config/guardrails.json `writeScope.pathAliases`).
 
-- features/<feature-name>/architecture.md
-- features/<feature-name>/backend-implementation-report.md
-- features/<feature-name>/frontend-implementation-report.md
-- features/<feature-name>/qa-report.md
-- Backend and Frontend source code
-- templates/security-review.md
-- context/**
-- policies/security.md
+May write:
 
----
+- features/<feature-name>/security-review.md
 
-## Validate
+Must never modify:
 
-Continue ONLY IF
-
-STATUS: READY_FOR_SECURITY_REVIEW
-
-exists inside qa-report.md
-
-Otherwise stop.
-
----
-
-## Produce
-
-Create
-
-features/<feature-name>/security-review.md
-
----
-
-The report must include
-
-# Summary
-
-# Overall Result
-
-# Findings
-
-# Authentication Review
-
-# Authorization Review
-
-# Secret Management Review
-
-# OWASP Top 10 Checklist
-
-# API Security Review
-
-# Input Validation Review
-
-# Sensitive Data Exposure Review
-
-# Recommendations
-
----
-
-Do NOT
-
-- Modify code
-
-- Modify specification, design, or architecture
-
-- Assume frontend validation is sufficient without server-side enforcement
-
----
-
-## Approval Rules
-
-APPROVED / APPROVED_WITH_COMMENTS / CHANGES_REQUIRED / REJECTED, per
-policies/quality-gates.md (Security Gate). Any unresolved Critical or High
-finding blocks approval.
-
----
-
-When finished, and only if the recommendation is APPROVED or
-APPROVED_WITH_COMMENTS
-
-STATUS: READY_FOR_OPERATIONS_REVIEW
-
-Otherwise list every vulnerability explicitly and stop.
-
----
-
-## Sync ADF Core
-
-Run:
-
-node adf-core/cli.mjs sync <feature-name>
-
-This regenerates adf-core/registry.json, INDEX.md, CONTEXT.md, and
-DEPENDENCY-GRAPH.md, and validates the repository scoped to this feature.
-Must complete with no errors before this stage's gate can be considered
-satisfied.
+- src/**
+- specification.md
+- design.md
+- architecture.md

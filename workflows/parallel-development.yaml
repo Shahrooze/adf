@@ -2,7 +2,7 @@ id: parallel-development
 
 name: Parallel Development Workflow
 
-version: 1.0.0
+version: 2.0.0
 
 description: >
   Demonstrates the Workflow Engine's parallel and conditional execution
@@ -16,6 +16,8 @@ description: >
 
 trigger:
   type: feature
+
+human_approval: true
 
 stages:
   - id: product
@@ -52,6 +54,9 @@ stages:
           name: Backend Gate
           required_artifacts:
             - backend-implementation-report.md
+          checks:
+            - build
+            - unit-tests
           status: READY_FOR_FRONTEND
         retry:
           max_attempts: 2
@@ -71,6 +76,9 @@ stages:
           name: Frontend Gate
           required_artifacts:
             - frontend-implementation-report.md
+          checks:
+            - build
+            - unit-tests
           status: READY_FOR_QA
         retry:
           max_attempts: 2
@@ -78,6 +86,9 @@ stages:
 
   - id: qa
     agent: qa-agent
+    on_fail:
+      rework: implementation
+      max_rounds: 2
     consumes:
       - backend-implementation-report.md
       - frontend-implementation-report.md
@@ -91,6 +102,9 @@ stages:
 
   - id: code-review
     agent: code-review-agent
+    on_fail:
+      rework: implementation
+      max_rounds: 2
     condition:
       type: stage-status
       target: qa
@@ -125,3 +139,4 @@ rules:
   - Backend Implementation and Frontend Implementation run concurrently once Architecture is approved.
   - Code Review only runs if QA completed successfully (see the "code-review" stage's condition).
   - A failed stage stops the workflow; artifacts already produced by sibling parallel branches are kept, not discarded.
+  - Branch gate checks run once after both branches finish (they share one working tree); a QA or Code Review rejection re-runs both branches with the findings.

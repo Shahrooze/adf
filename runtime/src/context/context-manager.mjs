@@ -86,7 +86,7 @@ export class ContextManager {
   // artifact id in the manager).
   build({ agent, workflowRunId, featureDir = null, consumesPaths = [], includePolicies = true }) {
     const projectContext = readDirText(this.contextDir);
-    const policies = includePolicies ? readDirText(this.policiesDir) : [];
+    const policies = includePolicies ? this._policiesFor(agent) : [];
 
     const artifacts = [];
     const dependencyIds = [];
@@ -116,6 +116,22 @@ export class ContextManager {
 
     bundle = this._trim(bundle);
     return bundle;
+  }
+
+  // An agent.yaml `policies:` list scopes the Policies section to what that
+  // agent actually applies (e.g. the Security Review agent gets security.md,
+  // not accessibility.md). Unknown names are reported, never silently lost.
+  _policiesFor(agent) {
+    const all = readDirText(this.policiesDir);
+    if (!Array.isArray(agent?.policies)) return all;
+    const byName = new Map(all.map((p) => [p.name.replace(/\.md$/, ""), p]));
+    const selected = [];
+    for (const name of agent.policies) {
+      const policy = byName.get(String(name).replace(/\.md$/, ""));
+      if (policy) selected.push(policy);
+      else this.logger?.warn?.(`Context: agent "${agent.id}" lists unknown policy "${name}"`, { agentId: agent.id });
+    }
+    return selected;
   }
 
   _resolveArtifact(consume, featureDir) {

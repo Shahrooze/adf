@@ -5,8 +5,8 @@
       "description": "Static analysis / linting for the adopting project's own stack."
     },
     "unit-tests": {
-      "command": "node --test",
-      "description": "Fast, isolated unit tests. Defaults to the Harness's own `node --test` suite; override per project."
+      "command": null,
+      "description": "Fast, isolated unit tests for the adopting project's own code (e.g. `dotnet test`, `npm test`). Used as a gate check by the implementation, QA and quick-change stages."
     },
     "integration-tests": {
       "command": null,
@@ -26,7 +26,11 @@
     },
     "review": {
       "command": null,
-      "description": "Automated review step — typically wired to invoke the code-review agent via `adf agent run code-review-agent`."
+      "description": "Automated review step \u2014 typically wired to invoke the code-review agent via `adf agent run code-review-agent`."
+    },
+    "harness-tests": {
+      "command": "node --test",
+      "description": "ADF's own Harness + adf-core test suite. Not part of any workflow gate; run it with `adf validate --stages harness-tests`."
     }
   }
 }

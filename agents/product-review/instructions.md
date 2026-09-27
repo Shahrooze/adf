@@ -2,151 +2,54 @@
 
 Follow these steps in order.
 
----
+## Step 1 - Validate Inputs and Status
 
-## Step 1 - Validate Inputs
+Verify specification.md exists; if missing, stop immediately. Continue only if it contains `STATUS: READY_FOR_PRODUCT_REVIEW`; otherwise stop and explain why.
 
-Verify specification.md exists.
+## Step 2 - Read Context
 
-If missing, stop immediately.
+Load context/project.md and policies/quality-gates.md.
 
----
+## Step 3 - Review Business Goal
 
-## Step 2 - Validate Status
+Verify the Business Goal is stated clearly enough that success can be measured.
 
-Continue only if specification.md contains
-
-STATUS: READY_FOR_PRODUCT_REVIEW
-
-Otherwise stop and explain why.
-
----
-
-## Step 3 - Read Context
-
-Load
-
-- context/project.md
-- policies/quality-gates.md
-
----
-
-## Step 4 - Review Business Goal
-
-Verify the Business Goal is stated clearly enough that success can be
-measured.
-
----
-
-## Step 5 - Review Completeness
+## Step 4 - Review Completeness
 
 Verify
 
 - Every Persona has a Goal, Permissions and Responsibilities
 - Every User Story has at least one Functional Requirement
-- Every Functional Requirement has at least one Acceptance Criterion
+- Every Functional Requirement traces to a User Story and has at least one Acceptance Criterion
 - Every Business Rule has a Description, Reason and Applies To
 
----
+## Step 5 - Review Acceptance Criteria Quality
 
-## Step 6 - Review Acceptance Criteria Quality
+Every Acceptance Criterion must be Testable, Observable, Binary (Pass/Fail) and Unambiguous. Flag vague criteria ("should work well").
 
-For every Acceptance Criterion verify it is
+## Step 6 - Review Business Rule Consistency
 
-- Testable
-- Observable
-- Binary (Pass/Fail)
-- Unambiguous
+Check every Business Rule against every other for contradictions, and check for contradictions between sections. No rule may encode a technical implementation detail.
 
----
+## Step 7 - Detect Ambiguity
 
-## Step 7 - Review Business Rule Consistency
+Identify any term, flow, or edge case open to more than one interpretation. Classify each Open Question as Blocking or Non-Blocking.
 
-Check every Business Rule against every other Business Rule for
-contradictions. Check that no rule encodes a technical implementation
-detail.
+## Step 8 - Produce Report
 
----
+Record findings as defined in system.md (Findings) and create product-review.md using templates/product-review.md.
 
-## Step 8 - Detect Ambiguity
+## Step 9 - Approval Rules
 
-Identify any term, flow, or edge case open to more than one interpretation.
+- APPROVED — no Critical, no High findings.
+- APPROVED_WITH_COMMENTS — only Medium/Low findings exist.
+- CHANGES_REQUIRED — any High finding exists.
+- REJECTED — any Critical finding exists, or a Blocking Open Question remains.
 
-Classify each Open Question as Blocking or Non-Blocking.
+## Step 10 - Final Validation
 
----
+Do not finish until Steps 3–9 are complete, findings are prioritized and a recommendation is selected. End product-review.md with the STATUS line mapped from the recommendation (system.md): `STATUS: READY_FOR_DESIGN`, `STATUS: CHANGES_REQUIRED` or `STATUS: REJECTED`.
 
-## Step 9 - Assign Severity
+## Step 11 - Sync ADF Core
 
-Each finding must contain
-
-- ID
-- Severity
-- Category
-- Description
-- Recommendation
-
-Allowed Severity
-
-- Critical
-- High
-- Medium
-- Low
-
----
-
-## Step 10 - Produce Product Review Report
-
-Create
-
-product-review.md
-
-using
-
-templates/product-review.md
-
----
-
-## Step 11 - Approval Rules
-
-APPROVED — no Critical, no High findings.
-
-APPROVED_WITH_COMMENTS — only Medium/Low findings exist.
-
-CHANGES_REQUIRED — any High finding exists.
-
-REJECTED — any Critical finding exists, or a Blocking Open Question remains.
-
----
-
-## Step 12 - Final Validation
-
-Do not finish until
-
-- Business Goal reviewed
-- Completeness reviewed
-- Acceptance Criteria Quality reviewed
-- Business Rule Consistency reviewed
-- Ambiguity detection completed
-- Findings prioritized
-- Recommendation selected
-
-Finish with
-
-STATUS: READY_FOR_DESIGN
-
-only if the recommendation is APPROVED or APPROVED_WITH_COMMENTS. Otherwise
-explain what the Feature Agent must fix and stop.
-
----
-
-## Step 13 - Sync ADF Core
-
-Run
-
-node adf-core/cli.mjs sync <feature-name>
-
-This regenerates adf-core/registry.json, INDEX.md, CONTEXT.md, and
-DEPENDENCY-GRAPH.md, and validates the repository scoped to this feature.
-Must complete with no errors before this stage's gate can be considered
-satisfied.
+Run `node adf-core/cli.mjs sync <feature-name>` (regenerates adf-core/registry.json, INDEX.md, CONTEXT.md, DEPENDENCY-GRAPH.md and validates this feature). It must pass with no errors before this stage's gate is satisfied.

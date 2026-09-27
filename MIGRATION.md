@@ -5,6 +5,59 @@ plan for that transition.
 
 ---
 
+# Migration Plan: Enforced Gates (v5)
+
+The Harness used to *describe* several rules it did not enforce: gates
+trusted the agent's own STATUS line, `agent.yaml` `permissions` and
+"human approval is required" were prose, a reviewer's rejection simply
+stopped the run, and every agent received every policy. v5 makes those
+rules binding, adds a lighter track for small changes, and makes
+`agents/` the single source of truth for prompts.
+
+## 1. Summary of Changes
+
+| Area | Before | Now |
+| --- | --- | --- |
+| Gate decision | Artifact exists + its STATUS line matches | Same, **plus** `gate.checks` run by the Harness (build/tests/lint from `config/validation-steps.json`) and a write-scope diff against `agent.yaml` permissions |
+| Reviewer says "no" | Retried like a crash (3×), then the run failed | Reviewers end with `STATUS: CHANGES_REQUIRED` / `REJECTED`; never retried; `on_fail.rework` sends the findings back to the author stage, ≤ `max_rounds`, then stops for a human |
+| Human approval | A rule in the YAML, not enforced | `human_approval: true` → run parks as `awaiting_approval` (exit 5) until `adf approve <run-id>` (or `--reject --reason`); interactive y/N/r on a TTY; `--auto-approve` for CI |
+| `agent.yaml` permissions | Mixed globs and prose ("frontend source code") | Globs and `@aliases` only (`config/guardrails.json` `writeScope.pathAliases`); enforced after every stage |
+| cli-adapter tool grants | Every declared tool, ignoring guardrails | Declared **and** allowed by guardrails (`ask` goes through the approval hook) |
+| Context | Every policy for every agent | `agent.yaml` `policies:` lists what each agent gets |
+| Small changes | Full 11-stage pipeline or nothing | `workflows/quick-change.yaml` (spec → backend ‖ frontend → QA → code review), only when the Feature Agent writes `TRACK: QUICK_CHANGE` |
+| Slash commands | Hand-written copies in `.claude/commands/` and `.codex/prompts/` | Generated from `agents/` by `./adf commands`; they point at `system.md`/`instructions.md` instead of copying them; `--check` + a test catch drift |
+| Default `unit-tests` step | `node --test` (ADF's own suite) | `null` — it is your project's test command now; ADF's suite moved to the `harness-tests` step (`npm test` also runs it) |
+| Example | None | `examples/features/archive-project/` — one feature through all eleven stages, gate-checked by the test suite |
+
+Also: `yaml-lite` no longer treats an apostrophe in prose as a quote
+(comments after `Don't …` were kept as content) and parses flat flow
+sequences (`[a, b]`); agent prompts were de-duplicated (~11% smaller
+overall after adding the rework / quick-change / rejection-status text);
+`adf doctor` reports unconfigured gate checks, the mock executor,
+tool/guardrail contradictions and stale commands.
+
+## 2. What You Need To Do
+
+1. **Configure `config/validation-steps.json`** with your real `build`,
+   `unit-tests`, `integration-tests`, `security-scan` and `lint`
+   commands. Until you do, those gate checks pass as *unverified* (shown
+   per stage); set `runtime.config.json` `workflow.strictChecks: true` to
+   make them fail instead. If you relied on `unit-tests` running ADF's
+   own suite, use `adf validate --stages harness-tests`.
+2. **Set `writeScope.pathAliases`** in `config/guardrails.json` to your
+   layout (defaults `src/backend/**` / `src/frontend/**`). If you added
+   your own agent, give its `permissions.write`/`deny` glob entries.
+3. **Expect approvals.** Headless runs of the shipped workflows now stop
+   after each stage with exit code 5. Use `adf approve`, or
+   `--auto-approve` / `workflow.approvals: "auto"` in CI.
+4. **Run `./adf commands`** after changing an agent's `command:` block or
+   permissions; never edit `.claude/commands/` or `.codex/prompts/`.
+5. **Don't edit the working tree during a run** — the write-scope check
+   attributes every change in the tree to the running stage. Use a
+   separate `git worktree` for parallel work.
+
+---
+
 # Migration Plan: ADF Core → ADF Agent Runtime / Harness (v4)
 
 ADF gains a full **Agent Runtime / Harness** (`runtime/`) — a lightweight

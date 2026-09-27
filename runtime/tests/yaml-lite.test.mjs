@@ -141,3 +141,55 @@ test("workflows/feature-development.yaml parses all 12 stages with gates intact"
   assert.equal(backend.gate.status, "READY_FOR_FRONTEND");
   assert.ok(wf.rules.length > 0);
 });
+
+test("an apostrophe inside plain prose is not a quote: trailing comments are stripped", () => {
+  const doc = parseYaml(`
+items:
+  - Don't guess # a comment
+  - it's fine
+note: the agent's output # c
+`);
+  assert.deepEqual(doc.items, ["Don't guess", "it's fine"]);
+  assert.equal(doc.note, "the agent's output");
+});
+
+test("quoted scalars keep '#' and ': ', quoted list items (e.g. @aliases) are unquoted", () => {
+  const doc = parseYaml(`
+a: "x # y"
+b: 'p: q # r'
+c: 'it''s'
+write:
+  - "@backend-code"
+  - '@x'
+`);
+  assert.equal(doc.a, "x # y");
+  assert.equal(doc.b, "p: q # r");
+  assert.equal(doc.c, "it's");
+  assert.deepEqual(doc.write, ["@backend-code", "@x"]);
+});
+
+test("flat flow sequences of plain or quoted scalars", () => {
+  const doc = parseYaml(`tags: [fs, git, terminal]\nempty: []\nq: ["a, b", 'c', 3]\n`);
+  assert.deepEqual(doc.tags, ["fs", "git", "terminal"]);
+  assert.deepEqual(doc.empty, []);
+  assert.deepEqual(doc.q, ["a, b", "c", 3]);
+});
+
+test("CRLF input, empty values followed by siblings, '#' without leading space, URLs", () => {
+  const doc = parseYaml("a: 1\r\nempty:\r\nb:\r\n  - x\r\nlang: C#14\r\nurl: http://x.y/z\r\n");
+  assert.deepEqual(doc, { a: 1, empty: null, b: ["x"], lang: "C#14", url: "http://x.y/z" });
+});
+
+test("sequence of mappings with nested block scalar and mapping", () => {
+  const doc = parseYaml(`
+stages:
+  - id: s1
+    description: |
+      line one
+      line two
+    gate:
+      status: OK
+  - id: s2
+`);
+  assert.deepEqual(doc.stages, [{ id: "s1", description: "line one\nline two\n", gate: { status: "OK" } }, { id: "s2" }]);
+});

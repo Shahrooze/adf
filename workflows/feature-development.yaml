@@ -2,7 +2,7 @@ id: feature-development
 
 name: Feature Development Workflow
 
-version: 3.1.0
+version: 4.0.0
 
 description: |
   Standard workflow for implementing a new feature using ADF.
@@ -14,6 +14,19 @@ description: |
   <feature-name>` (must pass with zero errors) — see adf-core/README.md.
   This is additive tooling, not a new stage: it does not change the stage
   list, artifacts, or gate statuses below.
+
+  Enforcement (runtime/src/workflow/workflow-engine.mjs):
+  - gate.checks are run by the Harness itself (config/validation-steps.json);
+    the agent's STATUS line alone never passes a gate that lists checks.
+  - Every file a stage changes must be inside that agent's agent.yaml
+    permissions (config/guardrails.json writeScope).
+  - A reviewer ending with STATUS: CHANGES_REQUIRED or REJECTED (or a
+    review stage whose checks fail) sends its findings back to the
+    on_fail.rework stage, at most max_rounds times, then stops for a human.
+  - human_approval: every agent stage waits for `adf approve <run-id>`
+    (or an interactive y/N) before the next stage starts.
+
+human_approval: true
 
 trigger:
   type: feature
@@ -41,6 +54,9 @@ stages:
 
   - id: product-review
     agent: product-review-agent
+    on_fail:
+      rework: feature
+      max_rounds: 2
     consumes:
       - specification.md
     produces:
@@ -97,6 +113,9 @@ stages:
 
   - id: architecture-review
     agent: architecture-review-agent
+    on_fail:
+      rework: architecture
+      max_rounds: 2
     consumes:
       - specification.md
       - design.md
@@ -133,6 +152,9 @@ stages:
       name: Backend Gate
       required_artifacts:
         - backend-implementation-report.md
+      checks:
+        - build
+        - unit-tests
       status: READY_FOR_FRONTEND
       pass_criteria:
         - Backend code compiles
@@ -160,6 +182,9 @@ stages:
       name: Frontend Gate
       required_artifacts:
         - frontend-implementation-report.md
+      checks:
+        - build
+        - unit-tests
       status: READY_FOR_QA
       pass_criteria:
         - Frontend code compiles
@@ -174,6 +199,9 @@ stages:
 
   - id: qa
     agent: qa-agent
+    on_fail:
+      rework: backend-implementation
+      max_rounds: 2
     consumes:
       - specification.md
       - design.md
@@ -185,6 +213,9 @@ stages:
       name: QA Gate
       required_artifacts:
         - qa-report.md
+      checks:
+        - unit-tests
+        - integration-tests
       status: READY_FOR_SECURITY_REVIEW
       pass_criteria:
         - Recommendation is APPROVED or APPROVED_WITH_COMMENTS
@@ -199,6 +230,9 @@ stages:
 
   - id: security-review
     agent: security-review-agent
+    on_fail:
+      rework: backend-implementation
+      max_rounds: 2
     consumes:
       - architecture.md
       - backend-implementation-report.md
@@ -210,6 +244,8 @@ stages:
       name: Security Gate
       required_artifacts:
         - security-review.md
+      checks:
+        - security-scan
       status: READY_FOR_OPERATIONS_REVIEW
       pass_criteria:
         - Recommendation is APPROVED or APPROVED_WITH_COMMENTS
@@ -223,6 +259,9 @@ stages:
 
   - id: operations-readiness
     agent: operations-readiness-agent
+    on_fail:
+      rework: backend-implementation
+      max_rounds: 2
     consumes:
       - architecture.md
       - backend-implementation-report.md
@@ -248,6 +287,9 @@ stages:
 
   - id: code-review
     agent: code-review-agent
+    on_fail:
+      rework: backend-implementation
+      max_rounds: 2
     consumes:
       - backend-implementation-report.md
       - frontend-implementation-report.md
@@ -260,6 +302,8 @@ stages:
       name: Code Quality Gate
       required_artifacts:
         - code-review-report.md
+      checks:
+        - lint
       status: RELEASE_READY
       pass_criteria:
         - Recommendation is APPROVED or APPROVED_WITH_COMMENTS
@@ -300,5 +344,7 @@ rules:
   - Design owns UX/UI decisions; Architecture owns technical/system decisions.
   - Backend Implementation never implements UI; Frontend Implementation never implements backend logic.
   - QA owns correctness/coverage; Security Review owns security; Operations Readiness Review owns production readiness; Code Review owns maintainability only — none may duplicate another's findings.
-  - A failed gate stops the workflow.
-  - Human approval is required before moving to the next stage.
+  - A failed gate stops the workflow, except that a reviewer's rejection is sent back to the stage named in on_fail.rework (bounded by max_rounds).
+  - Human approval is required before moving to the next stage (human_approval above; `adf approve <run-id>`).
+  - A gate's checks are run by the Harness; an agent cannot pass them by writing a STATUS line.
+  - Every stage may only change files inside its agent's permissions.write and outside its permissions.deny.

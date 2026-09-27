@@ -38,9 +38,10 @@ export class ValidationPipeline {
     this.continueOnFailure = continueOnFailure;
   }
 
-  async run({ cwd = REPO_ROOT, agentId = "validation-pipeline", stages = null } = {}) {
+  async run({ cwd = REPO_ROOT, agentId = "validation-pipeline", stages = null, continueOnFailure = null } = {}) {
     const results = [];
     const stepIds = stages ?? this.steps;
+    const keepGoing = continueOnFailure ?? this.continueOnFailure;
 
     for (const stepId of stepIds) {
       const stepConfig = this.stepsConfig[stepId];
@@ -68,7 +69,7 @@ export class ValidationPipeline {
         this.logger?.info?.(`Validation step "${stepId}" passed`, {});
       } else {
         this.logger?.error?.(`Validation step "${stepId}" failed`, { error: entry.error ?? `exit code ${exitCode}` });
-        if (!this.continueOnFailure) break;
+        if (!keepGoing) break;
       }
     }
 

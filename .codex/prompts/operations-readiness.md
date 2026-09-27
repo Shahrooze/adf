@@ -3,121 +3,34 @@ description: Independently review a feature for production/operations readiness.
 argument-hint: <feature-name>
 ---
 
-# Operations Readiness Review Command
+<!-- GENERATED from agents/operations-readiness/agent.yaml by `./adf commands` — do not edit. Change agents/operations-readiness/ instead. -->
 
-You are executing the ADF Operations Readiness Review Agent.
+# Operations Readiness Review Agent
 
-## Objective
+You are executing the ADF Operations Readiness Review Agent for: $ARGUMENTS
 
-Independently validate that the feature is operationally ready for
-production: observable, resilient, deployable, and recoverable.
+Read these two files in full and follow them exactly — they are the whole
+definition of this agent:
 
-Never modify implementation. Evaluate readiness only.
+1. agents/operations-readiness/system.md — role, responsibilities and hard constraints
+2. agents/operations-readiness/instructions.md — the step-by-step procedure, inputs, outputs and final STATUS
 
----
+`<feature-name>` in those files is the feature named above; its artifacts
+live under `features/<feature-name>/`.
 
-## Load Context
+## Write scope
 
-Read:
+When this agent runs under the ADF Harness, every file it changes is
+checked against agents/operations-readiness/agent.yaml `permissions` (`@alias` entries are
+defined in config/guardrails.json `writeScope.pathAliases`).
 
-- features/<feature-name>/architecture.md
-- features/<feature-name>/backend-implementation-report.md
-- features/<feature-name>/frontend-implementation-report.md
-- features/<feature-name>/security-review.md
-- templates/operations-readiness-report.md
-- context/tech-stack.md
-- policies/observability.md
+May write:
 
----
+- features/<feature-name>/operations-readiness-report.md
 
-## Validate
+Must never modify:
 
-Continue ONLY IF
-
-STATUS: READY_FOR_OPERATIONS_REVIEW
-
-exists inside security-review.md
-
-Otherwise stop.
-
----
-
-## Produce
-
-Create
-
-features/<feature-name>/operations-readiness-report.md
-
----
-
-The report must include
-
-# Summary
-
-# Overall Result
-
-# Findings
-
-# Logging Review
-
-# Metrics Review
-
-# Distributed Tracing Review
-
-# Health Checks Review
-
-# Configuration and Secrets Review
-
-# Resilience Review
-
-# Performance and Scalability Review
-
-# Container and Orchestration Readiness
-
-# Monitoring and Alerting Readiness
-
-# Deployment and Rollback Strategy
-
-# Recommendations
-
----
-
-Do NOT
-
-- Modify implementation
-
-- Modify specification, design, or architecture
-
-- Re-review application security (owned by Security Review)
-
-- Re-review code style (owned by Code Review)
-
----
-
-## Approval Rules
-
-APPROVED / APPROVED_WITH_COMMENTS / CHANGES_REQUIRED / REJECTED, per
-policies/quality-gates.md (Operations Gate). Missing health checks on a new
-API, or no rollback strategy, are Critical.
-
----
-
-When finished, and only if the recommendation is APPROVED or
-APPROVED_WITH_COMMENTS
-
-STATUS: READY_FOR_CODE_REVIEW
-
-Otherwise list every gap explicitly and stop.
-
----
-
-## Sync ADF Core
-
-Run:
-
-node adf-core/cli.mjs sync <feature-name>
-
-This regenerates adf-core/registry.json, INDEX.md, CONTEXT.md, and
-DEPENDENCY-GRAPH.md, and validates the repository scoped to this feature.
-Must complete with no errors before this stage's gate can be considered
-satisfied.
+- src/**
+- specification.md
+- design.md
+- architecture.md

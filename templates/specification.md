@@ -251,6 +251,14 @@ Before this feature moves to Product Review all conditions below MUST be true.
 
 ⸻
 
+Delivery Track
+
+TRACK: FULL
+
+Justification: <one line — QUICK_CHANGE only if every quick-change condition in agents/feature/instructions.md holds; otherwise FULL>
+
+⸻
+
 Approval
 
 Product Owner:
