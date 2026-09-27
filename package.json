@@ -1,0 +1,18 @@
+{
+  "name": "adf",
+  "private": true,
+  "description": "ADF (AI Development Framework): staged, gated AI agents plus the Harness that runs them. Zero dependencies.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "bin": {
+    "adf": "bin/adf.mjs"
+  },
+  "scripts": {
+    "test": "node --test runtime/tests/*.test.mjs adf-core/tests/*.test.mjs",
+    "doctor": "node bin/adf.mjs doctor",
+    "commands": "node bin/adf.mjs commands",
+    "commands:check": "node bin/adf.mjs commands --check"
+  }
+}
